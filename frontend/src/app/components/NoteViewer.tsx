@@ -1,48 +1,60 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { HelpCircle, Grid3x3, Share2, Edit3, AlignLeft, ListOrdered, Grid, Trash2, Settings, User, ExternalLink, LogOut, ChevronLeft } from 'lucide-react';
-import { useNotes } from '../../context/NotesContext';
+import { useNotes, Note } from '../../context/NotesContext';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { syncUpdateNote, syncDeleteNote, syncFetchNotes, syncCreateNote } from '../../utils/offlineSync';
-
-function deriveTitle(body: string): string {
-  const firstLine = body.split('\n')[0].trim();
-  return firstLine.slice(0, 255) || 'New Note';
-}
+import {
+  SymbolChecklist,
+  SymbolTableCells,
+  SymbolTextFormat,
+  SymbolTrash,
+  SymbolSquareAndPencil,
+  SymbolSquareAndArrowUp,
+  SymbolLockFill,
+  SymbolChevronLeft,
+  SymbolXmark
+} from './SFSymbols';
 
 interface NoteViewerProps {
   mobileView: 'list' | 'editor';
   onMobileViewChange: (v: 'list' | 'editor') => void;
 }
 
+function deriveTitle(body: string): string {
+  const firstLine = body.split('\n')[0].trim();
+  return firstLine.slice(0, 255) || 'New Note';
+}
+
+function formatFullTimestamp(iso?: string): string {
+  const d = iso ? new Date(iso) : new Date();
+  return d.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+}
+
 export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) {
   const { notes, setNotes, selectedNote, setSelectedNote, selectedFolder } = useNotes();
   const { addToast } = useToast();
-  const [error, setError] = useState<string | null>(null);
+  const { user, logout } = useAuth();
+
   const [title, setTitle] = useState('');
   const [restBody, setRestBody] = useState('');
+  const [isFormatOpen, setIsFormatOpen] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSavingRef = useRef(false);
-  const noteRef = useRef<{ id: string; revision: number } | null>(null);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
-  const { user, logout } = useAuth();
+  const formatDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close profile dropdown on click outside
-  useEffect(() => {
-    if (!profileOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [profileOpen]);
-
-  // Split body into title (first line) and rest on note selection
+  // Sync state with selectedNote
   useEffect(() => {
     const fullBody = selectedNote?.body ?? '';
     const newlineIdx = fullBody.indexOf('\n');
@@ -53,306 +65,460 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
       setTitle(fullBody.slice(0, newlineIdx));
       setRestBody(fullBody.slice(newlineIdx + 1));
     }
-    if (selectedNote) {
-      noteRef.current = { id: selectedNote.id, revision: selectedNote.revision };
-    } else {
-      noteRef.current = null;
-    }
   }, [selectedNote?.id]);
 
-  // Combine title + rest into full body
+  // Click outside format dropdown
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (formatDropdownRef.current && !formatDropdownRef.current.contains(e.target as Node)) {
+        setIsFormatOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   const getFullBody = useCallback((t: string, r: string) => {
     return r ? `${t}\n${r}` : t;
   }, []);
 
-  // Core save function
   const saveNote = useCallback(async (noteId: string, noteBody: string, revision: number) => {
     if (isSavingRef.current) return;
     isSavingRef.current = true;
     try {
       const updated = await syncUpdateNote(noteId, noteBody, revision);
-      noteRef.current = { id: updated.id, revision: updated.revision };
       const folderId = selectedFolder === 'All iCloud' ? undefined : selectedFolder;
       const refreshedNotes = await syncFetchNotes(folderId);
-      setNotes(refreshedNotes);
-      setSelectedNote(updated);
-    } catch (err: unknown) {
-      const axiosErr = err as { response?: { status?: number; data?: { currentNote?: typeof selectedNote } } };
-      if (axiosErr.response?.status === 409 && axiosErr.response?.data?.currentNote) {
-        const current = axiosErr.response.data.currentNote;
-        noteRef.current = { id: current.id, revision: current.revision };
-        setNotes(notes.map((n) => (n.id === current.id ? current : n)));
-        setSelectedNote(current);
-        addToast('Note was changed elsewhere. Refreshed with latest version.', 'warning');
+      if (refreshedNotes && refreshedNotes.length > 0) {
+        setNotes(refreshedNotes);
       } else {
-        addToast('Failed to save note', 'error');
+        setNotes((prev) => prev.map((n) => (n.id === noteId ? updated : n)));
       }
+      setSelectedNote(updated);
+    } catch {
+      // Local fallback
+      setNotes((prev) => {
+        const next = prev.map((n) =>
+          n.id === noteId
+            ? { ...n, body: noteBody, title: deriveTitle(noteBody), updatedAt: new Date().toISOString() }
+            : n
+        );
+        try {
+          localStorage.setItem('vpple_cached_notes', JSON.stringify(next));
+        } catch {
+          // ignore
+        }
+        return next;
+      });
     } finally {
       isSavingRef.current = false;
     }
-  }, [selectedFolder, notes, setNotes, setSelectedNote, addToast]);
+  }, [selectedFolder, setNotes, setSelectedNote]);
 
-  // Debounced autosave (800ms)
   const scheduleSave = useCallback((fullBody: string) => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      if (noteRef.current) {
-        saveNote(noteRef.current.id, fullBody, noteRef.current.revision);
+      if (selectedNote) {
+        saveNote(selectedNote.id, fullBody, selectedNote.revision || 1);
       }
-    }, 800);
-  }, [saveNote]);
+    }, 600);
+  }, [saveNote, selectedNote]);
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
-
-  const updateNote = (newTitle: string, newRestBody: string) => {
-    const fullBody = getFullBody(newTitle, newRestBody);
-    const derivedTitle = deriveTitle(fullBody);
+  const handleTitleChange = (newTitle: string) => {
+    if (newTitle.includes('\n')) return;
+    setTitle(newTitle);
+    const fullBody = getFullBody(newTitle, restBody);
+    const derived = deriveTitle(fullBody);
     if (selectedNote) {
-      setSelectedNote({ ...selectedNote, body: fullBody, title: derivedTitle });
-      setNotes((prev) =>
-        prev.map((n) =>
-          n.id === selectedNote.id ? { ...n, body: fullBody, title: derivedTitle } : n
-        )
-      );
+      setSelectedNote({ ...selectedNote, body: fullBody, title: derived });
       scheduleSave(fullBody);
     }
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    // Don't allow newlines in title field — pressing Enter moves to body
-    if (newTitle.includes('\n')) return;
-    setTitle(newTitle);
-    updateNote(newTitle, restBody);
-  };
-
   const handleRestBodyChange = (newRestBody: string) => {
     setRestBody(newRestBody);
-    updateNote(title, newRestBody);
-  };
-
-  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      bodyRef.current?.focus();
-    }
-  };
-
-  const handleBlur = () => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
-    if (noteRef.current && selectedNote) {
-      const fullBody = getFullBody(title, restBody);
-      saveNote(noteRef.current.id, fullBody, noteRef.current.revision);
-    }
-  };
-
-  const handleDeleteNote = async () => {
-    if (!selectedNote) return;
-    if (!window.confirm('Delete this note?')) return;
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
-    setError(null);
-    try {
-      await syncDeleteNote(selectedNote.id);
-      setNotes(notes.filter((n) => n.id !== selectedNote.id));
-      setSelectedNote(null);
-    } catch {
-      addToast('Failed to delete note', 'error');
+    const fullBody = getFullBody(title, newRestBody);
+    if (selectedNote) {
+      setSelectedNote({ ...selectedNote, body: fullBody });
+      scheduleSave(fullBody);
     }
   };
 
   const handleCreateNote = async () => {
     try {
       const folderId = selectedFolder === 'All iCloud' ? null : selectedFolder;
-      const newNote = await syncCreateNote('', folderId);
+      const newNote = await syncCreateNote('New Note\n', folderId);
       setNotes((prev) => [newNote, ...prev]);
       setSelectedNote(newNote);
       localStorage.setItem('selectedNoteId', newNote.id);
+      setTimeout(() => titleRef.current?.focus(), 50);
     } catch {
-      addToast('Failed to create note', 'error');
+      const localNote: Note = {
+        id: `note-${Date.now()}`,
+        title: 'New Note',
+        body: 'New Note\n',
+        revision: 1,
+        folderId: selectedFolder === 'All iCloud' ? null : selectedFolder,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      setNotes((prev) => [localNote, ...prev]);
+      setSelectedNote(localNote);
+      localStorage.setItem('selectedNoteId', localNote.id);
+      setTimeout(() => titleRef.current?.focus(), 50);
     }
   };
 
-  // Auto-resize title textarea
-  useEffect(() => {
-    if (titleRef.current) {
-      titleRef.current.style.height = 'auto';
-      titleRef.current.style.height = `${titleRef.current.scrollHeight}px`;
+  const handleDeleteNote = async () => {
+    if (!selectedNote) return;
+    if (!window.confirm('Delete this note?')) return;
+    try {
+      await syncDeleteNote(selectedNote.id);
+    } catch {
+      // offline delete
     }
-  }, [title]);
+    const remaining = notes.filter((n) => n.id !== selectedNote.id);
+    setNotes(remaining);
+    setSelectedNote(remaining.length > 0 ? remaining[0] : null);
+    try {
+      localStorage.setItem('vpple_cached_notes', JSON.stringify(remaining));
+    } catch {
+      // ignore
+    }
+  };
+
+  // Insert Checklist Item
+  const insertChecklist = () => {
+    const checklistTemplate = `\n[ ] `;
+    setRestBody((prev) => {
+      const updated = prev + checklistTemplate;
+      const full = getFullBody(title, updated);
+      scheduleSave(full);
+      return updated;
+    });
+    setTimeout(() => bodyRef.current?.focus(), 50);
+  };
+
+  // Insert Table Template
+  const insertTable = () => {
+    const tableTemplate = `\n| Column 1 | Column 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n`;
+    setRestBody((prev) => {
+      const updated = prev + tableTemplate;
+      const full = getFullBody(title, updated);
+      scheduleSave(full);
+      return updated;
+    });
+    setTimeout(() => bodyRef.current?.focus(), 50);
+  };
+
+  // Keyboard Shortcuts: Cmd+N (New Note), Shift+Cmd+L (Checklist), Opt+Cmd+T (Table)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        handleCreateNote();
+      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        insertChecklist();
+      } else if ((e.metaKey || e.altKey) && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        insertTable();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleCreateNote, insertChecklist, insertTable]);
 
   return (
-    <div className={`${mobileView === 'list' ? 'hidden md:flex' : 'flex'} flex-col flex-1 bg-[#1e1e1e]`}>
-      {/* Toolbar */}
-      <div className="relative z-10 px-6 py-3 border-b border-[#2d2d2d] flex items-center justify-between">
-        <div className="flex-1 flex items-center gap-3">
+    <main
+      className={`${
+        mobileView === 'list' ? 'hidden md:flex' : 'flex'
+      } flex-col flex-1 bg-[#1e1e1e] h-full overflow-hidden select-text`}
+    >
+      {/* Apple Notes Top Action Toolbar */}
+      <header className="h-12 px-4 border-b border-white/10 flex items-center justify-between select-none bg-[#262626]/80 backdrop-blur-md z-20">
+        {/* Left Section */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => onMobileViewChange('list')}
-            className="md:hidden p-1 hover:bg-[#2d2d2d] rounded cursor-pointer"
-            title="Back"
+            className="md:hidden p-1.5 text-[#e5a00d] hover:bg-white/5 rounded-md cursor-pointer"
+            title="Back to Notes"
           >
-            <ChevronLeft className="w-5 h-5 text-[#f5b800]" />
+            <SymbolChevronLeft className="w-5 h-5" />
           </button>
           <button
             type="button"
             onClick={handleDeleteNote}
-            className="p-1 hover:bg-[#2d2d2d] rounded cursor-pointer"
-            title="Delete"
+            disabled={!selectedNote}
+            className="p-1.5 text-[#86868b] hover:text-[#ff453a] hover:bg-white/5 rounded-md cursor-pointer disabled:opacity-30"
+            title="Delete Note"
           >
-            <Trash2 className="w-5 h-5 text-[#f5b800]" />
+            <SymbolTrash className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex items-center gap-4">
-          <button type="button" className="p-1 hover:bg-[#2d2d2d] rounded cursor-pointer">
-            <AlignLeft className="w-4 h-4 text-[#f5b800]" />
-          </button>
-          <button type="button" className="p-1 hover:bg-[#2d2d2d] rounded cursor-pointer">
-            <ListOrdered className="w-4 h-4 text-[#b4b4b4]" />
-          </button>
-          <button type="button" className="p-1 hover:bg-[#2d2d2d] rounded cursor-pointer">
-            <Grid className="w-4 h-4 text-[#b4b4b4]" />
-          </button>
-        </div>
-        <div className="flex-1 flex items-center justify-end gap-3">
-          <button type="button" className="p-1 hover:bg-[#2d2d2d] rounded cursor-pointer">
-            <HelpCircle className="w-5 h-5 text-[#b4b4b4]" />
-          </button>
-          <button type="button" className="p-1 hover:bg-[#2d2d2d] rounded cursor-pointer">
-            <Grid3x3 className="w-5 h-5 text-[#b4b4b4]" />
+
+        {/* Center Formatting Controls */}
+        <div className="flex items-center gap-1">
+          {/* Checklist Button */}
+          <button
+            type="button"
+            onClick={insertChecklist}
+            className="p-1.5 text-[#86868b] hover:text-[#e5a00d] hover:bg-white/5 rounded-md transition-colors cursor-pointer"
+            title="Checklist (⇧⌘L)"
+          >
+            <SymbolChecklist className="w-4 h-4" />
           </button>
 
-          {/* Profile avatar + dropdown */}
-          <div className="relative" ref={profileRef}>
+          {/* Table Button */}
+          <button
+            type="button"
+            onClick={insertTable}
+            className="p-1.5 text-[#86868b] hover:text-[#e5a00d] hover:bg-white/5 rounded-md transition-colors cursor-pointer"
+            title="Insert Table (⌥⌘T)"
+          >
+            <SymbolTableCells className="w-4 h-4" />
+          </button>
+
+          {/* Typography Format Dropdown */}
+          <div className="relative" ref={formatDropdownRef}>
             <button
               type="button"
-              onClick={() => setProfileOpen((prev) => !prev)}
-              className="p-0.5 hover:bg-[#2d2d2d] rounded-full cursor-pointer focus:outline-none"
-              title="Account"
+              onClick={() => setIsFormatOpen(!isFormatOpen)}
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                isFormatOpen
+                  ? 'bg-white/10 text-[#e5a00d]'
+                  : 'text-[#86868b] hover:text-[#e5a00d] hover:bg-white/5'
+              }`}
+              title="Text Styles (Aa)"
             >
-              {user?.pictureUrl ? (
-                <img
-                  src={user.pictureUrl}
-                  alt={user.name ?? 'Profile'}
-                  className="w-7 h-7 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-[#7e57c2] flex items-center justify-center text-white text-xs font-semibold select-none">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
-                </div>
-              )}
+              <SymbolTextFormat className="w-4 h-4" />
             </button>
 
-            {profileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[270px] bg-[#2d2d2d] border border-[#444] rounded-xl shadow-2xl z-50 overflow-hidden">
-                {/* User info */}
-                <div className="px-4 py-3">
-                  <p className="text-white text-sm font-semibold leading-snug">{user?.name ?? 'Unknown User'}</p>
-                  <p className="text-[#888] text-xs mt-0.5">{user?.email ?? ''}</p>
-                </div>
-
-                <div className="border-t border-[#444]" />
-
-                {/* iCloud Settings (mock) */}
+            {isFormatOpen && (
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 bg-[#2c2c2e] border border-white/10 rounded-xl shadow-2xl p-1.5 z-50">
                 <button
                   type="button"
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#3a3a3a] cursor-pointer"
+                  onClick={() => {
+                    setIsFormatOpen(false);
+                    titleRef.current?.focus();
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-[15px] font-bold text-white hover:bg-white/10 rounded-md"
                 >
-                  <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                    <Settings className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-white text-sm">iCloud Settings</span>
+                  Title
                 </button>
-
-                {/* Manage Apple Account (mock) */}
                 <button
                   type="button"
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#3a3a3a] cursor-pointer"
+                  onClick={() => {
+                    setIsFormatOpen(false);
+                    setRestBody((prev) => prev + '\n## Heading\n');
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-[14px] font-semibold text-white hover:bg-white/10 rounded-md"
                 >
-                  <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-white text-sm flex-1 text-left">Manage Apple Account</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#777] flex-shrink-0" />
+                  Heading
                 </button>
-
-                <div className="border-t border-[#444]" />
-
-                {/* Sign Out (functional) */}
                 <button
                   type="button"
-                  onClick={() => { setProfileOpen(false); logout(); }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#3a3a3a] cursor-pointer"
+                  onClick={() => {
+                    setIsFormatOpen(false);
+                    setRestBody((prev) => prev + '\n### Subheading\n');
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-[13px] font-medium text-white hover:bg-white/10 rounded-md"
                 >
-                  <LogOut className="w-4 h-4 text-red-400 flex-shrink-0" />
-                  <span className="text-red-400 text-sm">Sign Out</span>
+                  Subheading
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsFormatOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-[13px] text-[#86868b] hover:bg-white/10 rounded-md"
+                >
+                  Body
+                </button>
+                <div className="border-t border-white/10 my-1" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsFormatOpen(false);
+                    setRestBody((prev) => prev + '\n`code`\n');
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-[12.5px] font-mono text-[#ff9f0a] hover:bg-white/10 rounded-md"
+                >
+                  Monospaced
                 </button>
               </div>
             )}
           </div>
+        </div>
 
-          <button type="button" className="p-1 hover:bg-[#2d2d2d] rounded cursor-pointer">
-            <Share2 className="w-5 h-5 text-[#b4b4b4]" />
+        {/* Right Action Icons */}
+        <div className="flex items-center gap-1.5">
+          {/* Lock Note */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsLocked(!isLocked);
+              addToast(isLocked ? 'Note unlocked' : 'Note locked', 'info');
+            }}
+            className={`p-1.5 rounded-md cursor-pointer ${
+              isLocked ? 'text-[#e5a00d]' : 'text-[#86868b] hover:text-white hover:bg-white/5'
+            }`}
+            title="Lock Note"
+          >
+            <SymbolLockFill className="w-4 h-4" />
           </button>
+
+          {/* Share */}
+          <button
+            type="button"
+            onClick={() => setIsShareModalOpen(true)}
+            className="p-1.5 text-[#86868b] hover:text-white hover:bg-white/5 rounded-md cursor-pointer"
+            title="Share Note"
+          >
+            <SymbolSquareAndArrowUp className="w-4 h-4" />
+          </button>
+
+          {/* New Note Button */}
           <button
             type="button"
             onClick={handleCreateNote}
-            className="p-1 hover:bg-[#2d2d2d] rounded cursor-pointer"
-            title="New Note"
+            className="p-1.5 text-[#e5a00d] hover:bg-white/5 rounded-md cursor-pointer ml-1"
+            title="New Note (⌘N)"
           >
-            <Edit3 className="w-5 h-5 text-[#f5b800]" />
+            <SymbolSquareAndPencil className="w-4 h-4" />
           </button>
-        </div>
-      </div>
 
-      {error && (
-        <div className="px-6 py-2 text-red-500 text-sm">{error}</div>
-      )}
-      {/* Note Content */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 md:px-12 lg:px-24">
-        <div className="max-w-3xl">
+          {/* Account Profile Avatar */}
+          <div className="relative ml-1">
+            <button
+              type="button"
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="w-7 h-7 rounded-full bg-[#3a3a3c] border border-white/10 flex items-center justify-center text-[11px] font-semibold text-white/90 cursor-pointer hover:border-[#e5a00d] transition-colors"
+              title="Account"
+            >
+              {user?.pictureUrl ? (
+                <img src={user.pictureUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span>{user?.name ? user.name[0].toUpperCase() : 'V'}</span>
+              )}
+            </button>
+
+            {profileOpen && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-[#2c2c2e] border border-white/10 rounded-xl shadow-2xl p-2 z-50">
+                <div className="px-2 py-1.5 border-b border-white/10 mb-1">
+                  <div className="text-[13px] font-semibold text-white truncate">{user?.name || 'Vpple Account'}</div>
+                  <div className="text-[11px] text-[#86868b] truncate">{user?.email || 'Local Storage Session'}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    logout();
+                  }}
+                  className="w-full text-left px-2 py-1.5 text-[12px] text-[#ff453a] hover:bg-white/5 rounded-md cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Editor Surface */}
+      <div className="flex-1 overflow-y-auto px-6 py-6 md:px-16 lg:px-24">
+        <div className="max-w-3xl mx-auto">
           {selectedNote ? (
             <>
+              {/* Centered Date Timestamp */}
+              <div className="text-center text-[12px] font-medium text-[#86868b] mb-6 select-none">
+                {formatFullTimestamp(selectedNote.updatedAt || selectedNote.createdAt)}
+              </div>
+
+              {/* Title Textarea */}
               <textarea
                 ref={titleRef}
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                onKeyDown={handleTitleKeyDown}
-                onBlur={handleBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    bodyRef.current?.focus();
+                  }
+                }}
                 placeholder="Title"
                 rows={1}
-                className="w-full bg-transparent text-white text-4xl font-bold leading-tight resize-none outline-none placeholder:text-[#555] mb-4 overflow-hidden"
+                className="w-full bg-transparent text-[#f5f5f7] text-3xl font-bold leading-tight resize-none outline-none placeholder:text-[#636366] mb-3 overflow-hidden font-sans tracking-tight"
                 spellCheck={false}
               />
+
+              {/* Body Textarea */}
               <textarea
                 ref={bodyRef}
                 value={restBody}
                 onChange={(e) => handleRestBodyChange(e.target.value)}
-                onBlur={handleBlur}
                 placeholder="Start typing..."
-                className="w-full min-h-[200px] md:min-h-[400px] bg-transparent text-white text-lg md:text-xl lg:text-2xl leading-relaxed resize-none outline-none placeholder:text-[#8e8e8e]"
+                className="w-full min-h-[380px] bg-transparent text-[#e5e5ea] text-[15px] leading-relaxed resize-none outline-none placeholder:text-[#636366] font-sans"
                 spellCheck={false}
               />
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-[#8e8e8e] text-sm">
-              Select a note or create a new one
+            <div className="flex flex-col items-center justify-center h-[60vh] text-[#86868b] select-none text-center">
+              <SymbolSquareAndPencil className="w-12 h-12 text-[#636366] mb-3 opacity-60" />
+              <p className="text-[14px]">No Note Selected</p>
+              <button
+                type="button"
+                onClick={handleCreateNote}
+                className="mt-3 text-[#e5a00d] text-[13px] font-semibold hover:underline"
+              >
+                Create a Note
+              </button>
             </div>
           )}
         </div>
       </div>
-    </div>
+
+      {/* Share Dialog */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-[#2c2c2e] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white text-[16px] font-semibold">Share Note</h3>
+              <button
+                type="button"
+                onClick={() => setIsShareModalOpen(false)}
+                className="text-[#86868b] hover:text-white"
+              >
+                <SymbolXmark className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-[#86868b] text-[13px] mb-4">
+              Collaborate or send a copy of this note.
+            </p>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(selectedNote?.body || '');
+                  addToast('Note content copied to clipboard', 'success');
+                  setIsShareModalOpen(false);
+                }}
+                className="w-full py-2 bg-[#e5a00d] text-white rounded-lg text-[13px] font-semibold hover:bg-[#d4940c] transition-colors"
+              >
+                Copy Note Text
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsShareModalOpen(false)}
+                className="w-full py-2 bg-white/5 text-[#f5f5f7] rounded-lg text-[13px] hover:bg-white/10 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
   );
 }

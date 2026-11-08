@@ -159,13 +159,13 @@ The `revision` field prevents data loss when two people edit the same note simul
    ```bash
    PUT /api/notes/abc { body: "A's update", revision: 2 }
    ```
-   ✅ Success! Response has `revision: 3`
+    Success! Response has `revision: 3`
 
 3. User B tries to save with old revision:
    ```bash
    PUT /api/notes/abc { body: "B's update", revision: 2 }
    ```
-   ❌ Gets 409 Conflict, response includes current note with `revision: 3`
+    Gets 409 Conflict, response includes current note with `revision: 3`
 
 4. User B's frontend shows error: "Note was updated elsewhere. Refresh?"
 

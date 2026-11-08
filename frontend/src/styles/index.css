@@ -2,10 +2,130 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --notes-bg-sidebar: #1e1e1e;
+  --notes-bg-list: #1c1c1e;
+  --notes-bg-editor: #1e1e1e;
+  --notes-toolbar: #262626;
+  --notes-accent: #e5a00d;
+  --notes-accent-hover: #f5b800;
+  --notes-border: rgba(255, 255, 255, 0.08);
+  --notes-border-subtle: rgba(255, 255, 255, 0.05);
+  --notes-selection: rgba(229, 160, 13, 0.2);
+  --notes-selection-active: #c28b12;
+  --notes-text-primary: #f5f5f7;
+  --notes-text-secondary: #86868b;
+  --notes-text-muted: #636366;
+}
+
+body {
+  font-family: "SP Pro Display", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--notes-bg-sidebar);
+  color: var(--notes-text-primary);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* macOS Subtle Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* Typography Presets */
+.notes-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--notes-text-primary);
+}
+
+.notes-heading {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--notes-text-primary);
+}
+
+.notes-subheading {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--notes-text-primary);
+}
+
+.notes-body {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #e5e5ea;
+}
+
+.notes-mono {
+  font-family: "SF Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #ff9f0a;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+/* Checklists */
+.notes-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+.notes-checklist-item.completed {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* Tables */
+.notes-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.notes-table th,
+.notes-table td {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.notes-table th {
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 600;
+  color: var(--notes-text-primary);
+}
+
 @keyframes slide-in {
   from { transform: translateX(100%); opacity: 0; }
   to   { transform: translateX(0);    opacity: 1; }
 }
+
 .animate-slide-in {
   animation: slide-in 0.2s ease-out;
 }

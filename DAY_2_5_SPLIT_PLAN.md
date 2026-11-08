@@ -7,7 +7,7 @@
 
 ---
 
-## 🎯 API Contract (Share This With Your Partner FIRST!)
+##  API Contract (Share This With Your Partner FIRST!)
 
 Your partner needs to know what API endpoints exist and what data they return.
 
@@ -203,8 +203,8 @@ DELETE /api/notes/:id
 ### Tasks:
 
 1. **Verify Revision Field Works**
-   - Test updating a note with correct revision ✅
-   - Test updating with wrong revision → should get 409 Conflict ✅
+   - Test updating a note with correct revision 
+   - Test updating with wrong revision → should get 409 Conflict 
    - Verify each update increments revision number
 
 2. **Test Race Conditions**
@@ -979,7 +979,7 @@ DELETE /api/notes/:id
 
 ---
 
-# 🤝 Synchronization Points
+#  Synchronization Points
 
 **End of Each Day:**
 
@@ -1000,7 +1000,7 @@ git merge main  # Get latest from other person
 
 ---
 
-# 🚨 If Something Breaks
+#  If Something Breaks
 
 **Merge Conflicts?**
 ```bash
@@ -1027,7 +1027,7 @@ git commit -m "fix: Resolve merge conflicts"
 
 ---
 
-# 📋 Final Checklist
+#  Final Checklist
 
 **Backend (You)**
 - [ ] Day 2: All 5 API endpoints working
@@ -1050,4 +1050,4 @@ git commit -m "fix: Resolve merge conflicts"
 
 ---
 
-**Good luck! You've got this! 🚀**
+**Good luck! You've got this! **

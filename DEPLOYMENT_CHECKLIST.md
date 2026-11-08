@@ -112,8 +112,8 @@ Tables are auto-created/migrated on first API request via `ensureDbInitialized()
 
 This app uses the **Google Identity Services (GIS) ID token flow**: the frontend gets an ID token directly from Google and sends it to `/api/auth/google` for verification. This is _not_ an authorization code flow with server redirects.
 
-- ✅ **Authorized JavaScript origins** — required
-- ❌ **Authorized redirect URIs** — not needed for this flow
+-  **Authorized JavaScript origins** — required
+-  **Authorized redirect URIs** — not needed for this flow
 
 ### Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID
 

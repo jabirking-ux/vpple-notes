@@ -213,11 +213,11 @@ npm install
 
 ## You're Ready!
 
-1. ✅ Folder structure ready
-2. ✅ Figma frontend in place
-3. ✅ Claude Code prompts prepared
-4. ✅ Git workflow set up
+1.  Folder structure ready
+2.  Figma frontend in place
+3.  Claude Code prompts prepared
+4.  Git workflow set up
 
-**Run the Day 1 Claude Code prompt and start building!** 🚀
+**Run the Day 1 Claude Code prompt and start building!** 
 
 Questions? Ask me anytime during the sprint.

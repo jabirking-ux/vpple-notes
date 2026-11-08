@@ -1,4 +1,4 @@
-# 🚀 iCloud Notes Clone - Launch Checklist
+#  iCloud Notes Clone - Launch Checklist
 
 **Repo:** https://github.com/LubaKaper/iCloud-Notes-Clone.git  
 **Status:** READY TO BUILD  
@@ -6,9 +6,9 @@
 
 ---
 
-## 📦 What You Have (Complete Package)
+##  What You Have (Complete Package)
 
-### ✅ Documentation Files
+###  Documentation Files
 - [x] `README_START_HERE.md` - Overview & strategy
 - [x] `PROJECT_SETUP.md` - Detailed 5-day breakdown + daily prompts
 - [x] `GITHUB_SETUP_INSTRUCTIONS.md` - Step-by-step GitHub setup
@@ -18,14 +18,14 @@
 - [x] `icloud_notes_css_polish_guide.docx` - CSS refinement guide
 - [x] `icloud_notes_tailwind_template.jsx` - Tailwind template
 
-### ✅ Starter Code Files
+###  Starter Code Files
 - [x] `NotesApp.tsx` - Main three-column layout
 - [x] `Sidebar.tsx` - Folders & tags (200px width)
 - [x] `NotesList.tsx` - Search & note list (360px width)
 - [x] `NoteViewer.tsx` - Editor & toolbar (flex width)
 - [x] `package.json` - Frontend dependencies (React 18, Tailwind, shadcn/ui)
 
-### ✅ Instructions & Guides
+###  Instructions & Guides
 - [x] Daily Claude Code prompts (Day 1-5)
 - [x] Git workflow instructions
 - [x] Troubleshooting guide
@@ -34,7 +34,7 @@
 
 ---
 
-## 📋 Your Implementation Checklist
+##  Your Implementation Checklist
 
 ### Before You Start (DO THIS FIRST)
 - [ ] Download all files from outputs folder
@@ -194,7 +194,7 @@
 
 ---
 
-## 🎯 Daily Check-Ins
+##  Daily Check-Ins
 
 ### End of Each Day, Verify:
 - [ ] Frontend still runs on localhost:5173
@@ -206,37 +206,37 @@
 
 ---
 
-## 🚨 Critical Milestones
+##  Critical Milestones
 
 **Day 1 DONE when:**
-- Backend API running ✅
-- CRUD endpoints tested ✅
-- Database connected ✅
+- Backend API running 
+- CRUD endpoints tested 
+- Database connected 
 
 **Day 2 DONE when:**
-- Components wired to state ✅
-- Clicking sidebar updates list ✅
-- Selecting note shows content ✅
+- Components wired to state 
+- Clicking sidebar updates list 
+- Selecting note shows content 
 
 **Day 3 DONE when:**
-- Autosave works on keystroke ✅
-- Autosave works on blur ✅
-- Data persists after refresh ✅
+- Autosave works on keystroke 
+- Autosave works on blur 
+- Data persists after refresh 
 
 **Day 4 DONE when:**
-- Search filters notes ✅
-- Delete has confirmation ✅
-- Errors handled & shown ✅
+- Search filters notes 
+- Delete has confirmation 
+- Errors handled & shown 
 
 **Day 5 DONE when:**
-- All features tested ✅
-- Frontend deployed ✅
-- Backend deployed ✅
-- Production URLs work ✅
+- All features tested 
+- Frontend deployed 
+- Backend deployed 
+- Production URLs work 
 
 ---
 
-## 🆘 If You Get Stuck
+##  If You Get Stuck
 
 **Frontend won't run:**
 ```bash
@@ -268,27 +268,27 @@ git push origin feature/autosave-backend-day1
 
 ---
 
-## 📞 Support During Sprint
+##  Support During Sprint
 
 **I'm here for:**
-- ✅ Clarifying requirements
-- ✅ Debugging Claude Code output
-- ✅ Reviewing your code
-- ✅ Git/branch help
-- ✅ Deployment questions
-- ✅ Architecture questions
-- ✅ Performance optimization
-- ✅ Anything else!
+-  Clarifying requirements
+-  Debugging Claude Code output
+-  Reviewing your code
+-  Git/branch help
+-  Deployment questions
+-  Architecture questions
+-  Performance optimization
+-  Anything else!
 
-**Just ask in the chat!** 🙋
+**Just ask in the chat!** 
 
 ---
 
-## 🎉 Success Criteria (End of Day 5)
+##  Success Criteria (End of Day 5)
 
 You've succeeded when:
 
-✅ **Functionality:**
+ **Functionality:**
 - Users can create notes
 - Users can view/search notes
 - Users can edit notes
@@ -296,18 +296,18 @@ You've succeeded when:
 - Autosave works (800ms debounce + blur)
 - Zero data loss (IndexedDB fallback)
 
-✅ **Design:**
+ **Design:**
 - Three-column layout matches iCloud
 - Colors/spacing match design spec
 - Responsive on mobile
 
-✅ **Technical:**
+ **Technical:**
 - Frontend deployed (Vercel)
 - Backend deployed (Railway/Heroku)
 - Production URLs work
 - Code is clean & documented
 
-✅ **Delivery:**
+ **Delivery:**
 - Pull request created
 - All code committed
 - README with production links
@@ -315,7 +315,7 @@ You've succeeded when:
 
 ---
 
-## 📊 Final Metrics
+##  Final Metrics
 
 | Metric | Target | Result |
 |--------|--------|--------|
@@ -327,12 +327,12 @@ You've succeeded when:
 
 ---
 
-## 🚀 You're Ready!
+##  You're Ready!
 
 **Next step: Read `GITHUB_SETUP_INSTRUCTIONS.md` and start Day 1!**
 
-Good luck! I'll be here for support throughout. 💪
+Good luck! I'll be here for support throughout. 
 
 ---
 
-**Questions? Ask anytime. Let's build! 🎯**
+**Questions? Ask anytime. Let's build! **

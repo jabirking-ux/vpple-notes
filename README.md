@@ -1,211 +1,119 @@
-# iCloud Notes Clone
+# Vpple Notes
 
-A full-stack iCloud Notes clone built with React, Express, and PostgreSQL. Features a dark-themed three-column layout, folder organization, CRUD operations, autosave with debounce, and offline persistence via IndexedDB.
+A 1:1 reverse-engineered implementation of Apple Notes (macOS & iOS) built on top of [iCloud-Notes-Clone](https://github.com/LubaKaper/iCloud-Notes-Clone) by Luba Kaper.
 
-## Tech Stack
+Features a 3-column split layout, native Apple SF Symbols vector iconography (with zero emojis), macOS Tahoe dark mode materials, amber gold accent tint, interactive checklists, markdown tables, real-time autosave, and offline IndexedDB persistence.
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18, Vite, Tailwind CSS 3, TypeScript |
-| Icons | lucide-react |
-| Backend | Express 4, TypeScript |
-| Database | PostgreSQL 17 |
-| Offline Storage | IndexedDB |
+Hosted live on GitHub Pages: [https://jabirking-ux.github.io/vpple-notes/](https://jabirking-ux.github.io/vpple-notes/)
 
-## Project Structure
+---
+
+## Upstream Attribution & Provenance
+
+* **Upstream Repository:** [https://github.com/LubaKaper/iCloud-Notes-Clone](https://github.com/LubaKaper/iCloud-Notes-Clone)
+* **Upstream Author:** Luba Kaper (`liubovkaper@pursuit.org`)
+* **Base Commit:** `ea176c0ca4d33bc6f323e2873d43dae6ad8eb9e9` (Increase note body font size for presentation)
+
+All architectural differences, token audits, and reverse engineering decisions are documented in detail in [REVERSE_ENGINEERING.md](./REVERSE_ENGINEERING.md). For revision history, see [CHANGELOG.md](./CHANGELOG.md).
+
+---
+
+## Architecture & Specifications
+
+### 1. Zero Emoji & Native SF Symbols Policy
+Native Apple Notes uses vector SF Symbols instead of unicode emojis or generic web icons. All symbols in this application are resolution-independent monochrome SVGs matching macOS Tahoe & iOS 26 SF Symbols:
+* `folder` / `folder.badge.plus`: Folder navigation and creation
+* `pin.fill`: Note pinning
+* `square.and.pencil`: New note creation
+* `checklist` / `circle` / `checkmark.circle.fill`: Interactive task lists
+* `tablecells`: 2x2 table grid insertion
+* `textformat`: Typography format dropdown
+* `trash`: Note deletion
+* `square.and.arrow.up`: Share and export
+* `sidebar.left`: Sidebar visibility toggle
+* `magnifyingglass`: Search input
+* `lock.fill`: Note security toggle
+
+### 2. Design Tokens & macOS Dark Palette
+* **Toolbar / Header:** `#262626`
+* **Sidebar (240px width):** `#1e1e1e`
+* **Notes List (320px width):** `#1c1c1e`
+* **Editor Canvas:** `#1e1e1e`
+* **Accent Color:** `#e5a00d` (Apple Notes Amber Gold)
+* **Active Note Selection:** `#e5a00d` background, `#f5f5f7` text
+* **Window Controls:** Red (`#ff5f56`), Yellow (`#ffbd2e`), Green (`#27c93f`)
+
+### 3. Keyboard Accelerators
+* `⌘ + N` / `Ctrl + N`: Create new note
+* `⇧ + ⌘ + L` / `Ctrl + Shift + L`: Insert checklist item
+* `⌥ + ⌘ + T` / `Alt + Cmd + T`: Insert markdown table
+* `⌥ + ⌘ + S`: Toggle sidebar visibility
+
+---
+
+## Directory Structure
 
 ```
-icloud-notes-clone/
-├── frontend/               # React + Vite + Tailwind
+vpple-notes/
+├── index.html              # Production standalone root entry for GitHub Pages
+├── assets/                 # Compiled CSS and JavaScript bundles
+├── REVERSE_ENGINEERING.md  # Factual technical audit and gap analysis
+├── CHANGELOG.md            # Version change history
+├── frontend/               # React 18 + TypeScript + Vite source code
 │   ├── src/
-│   │   ├── app/components/ # UI components (NotesApp, Sidebar, NotesList, NoteViewer)
-│   │   ├── context/        # NotesContext (notes, folders, selectedNote, selectedFolder)
-│   │   ├── utils/          # api.ts (axios), offlineSync.ts, indexedDb.ts, debounce.ts
-│   │   └── styles/         # Tailwind CSS entry
-│   ├── vite.config.ts      # Proxies /api -> localhost:3000
-│   └── package.json
-├── backend/                # Express + PostgreSQL
+│   │   ├── app/
+│   │   │   └── components/ # NotesApp, Sidebar, NotesList, NoteViewer, SFSymbols
+│   │   ├── context/        # NotesContext, AuthContext, ToastContext
+│   │   ├── utils/          # api.ts, offlineSync.ts, indexedDb.ts, debounce.ts
+│   │   ├── styles/         # index.css with Apple Notes variables
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── package.json
+│   └── vite.config.ts
+├── backend/                # Express 4 + TypeScript REST API (optional)
 │   ├── src/
-│   │   ├── server.ts       # Express app, port 3000
-│   │   ├── db.ts           # PostgreSQL pool + table/column init
-│   │   ├── routes/
-│   │   │   ├── notes.ts    # 5 REST endpoints for notes
-│   │   │   └── folders.ts  # 4 REST endpoints for folders
-│   │   ├── models/
-│   │   │   ├── Note.ts     # Note interface + CRUD helpers
-│   │   │   └── Folder.ts   # Folder interface + CRUD helpers
-│   │   └── middleware/     # Error handler
+│   │   ├── server.ts
+│   │   ├── routes/         # Notes and folders API routes
+│   │   └── db.ts           # PostgreSQL connection pool
 │   └── package.json
-└── docs/                   # PRD, design spec, setup guides
+└── package.json            # Root workspace configuration
 ```
 
-## Quick Start
+---
+
+## Running Locally
 
 ### Prerequisites
-- Node.js 18+
-- PostgreSQL 17 running locally (`brew services start postgresql@17`)
+* Node.js 18+
+* npm 9+
+* Optional: PostgreSQL 17 (only required if running local backend API)
 
-### 1. Backend
-```bash
-cd backend
-cp .env.example .env        # Edit DATABASE_URL if needed
-npm install
-npm run dev                  # Starts on http://localhost:3000
-```
-
-### 2. Frontend
+### 1. Frontend Development Server
 ```bash
 cd frontend
 npm install
-npm run dev                  # Starts on http://localhost:5173
+npm run dev
 ```
+The client starts on `http://localhost:5173`. If no backend is running, the app automatically operates in offline-first mode using IndexedDB and LocalStorage.
 
-The Vite dev server proxies all `/api` requests to the backend, so no CORS issues in development.
-
-## API Endpoints
-
-### Notes
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/notes` | Create a note `{ body: string, folderId?: string }` |
-| GET | `/api/notes` | List notes. Optional `?folderId=` to filter by folder |
-| GET | `/api/notes/:id` | Get a single note |
-| PUT | `/api/notes/:id` | Update a note `{ body: string, revision: number }` |
-| DELETE | `/api/notes/:id` | Delete a note |
-
-### Folders
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/folders` | Create a folder `{ name: string }` |
-| GET | `/api/folders` | List all folders (alphabetical) |
-| PUT | `/api/folders/:id` | Rename a folder `{ name: string }` |
-| DELETE | `/api/folders/:id` | Delete a folder (notes become uncategorized) |
-
-**Revision handling:** PUT only succeeds if `incoming revision` matches stored revision exactly, then increments by 1. Returns 409 on conflict. Title is auto-derived from the first line of the body.
-
-## Database Schema
-
-```sql
-CREATE TABLE folders (
-  id UUID PRIMARY KEY,
-  name TEXT NOT NULL,
-  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE notes (
-  id UUID PRIMARY KEY,
-  title TEXT NOT NULL DEFAULT '',
-  body TEXT NOT NULL DEFAULT '',
-  revision INTEGER NOT NULL DEFAULT 0,
-  "folderId" UUID REFERENCES folders(id) ON DELETE SET NULL,
-  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+### 2. Building for Production
+```bash
+cd frontend
+npm run build
 ```
+Compiled output is written to `frontend/dist/` with relative asset links (`base: './'`).
 
-Both tables are auto-created (or migrated) when the backend starts.
+### 3. Running Backend (Optional)
+```bash
+cd backend
+npm install
+cp .env.example .env
+npm run dev
+```
+The API server starts on `http://localhost:3000`.
 
 ---
 
-## Features
+## License
 
-### Notes
-- Create, view, edit, delete notes
-- Title auto-derived from the first line of the body (large heading in editor)
-- Autosave: 800ms debounce after typing stops, plus immediate save on blur
-- Notes list shows bold title, date, body preview, and folder name
-- Search filters notes by title or body
-
-### Folders
-- Create folders via the "New Folder" button (prompted for a name)
-- Select a folder to view only its notes
-- "All iCloud" always shows all notes regardless of folder
-- Delete a folder — its notes stay, they just become uncategorized
-- Folder icon shown on each note in the list
-
-### Persistence
-- IndexedDB caches notes for offline access
-- Pending creates/updates/deletes sync to server when back online
-- Selected folder and note restored from `localStorage` on page reload
-
----
-
-## Success Criteria
-
-- Users can create, view, edit, and delete notes
-- Autosave triggers after 800ms inactivity and on blur
-- Notes are organized into folders; "All iCloud" shows everything
-- Zero data loss (IndexedDB fallback + server sync)
-- Three-column dark-themed layout matching iCloud design
-- Selected folder and note persist across page reloads
-- Notes are scoped per user — two Google accounts see separate, isolated notes
-
----
-
-## Authentication — Google Sign-In Setup
-
-### Google Cloud Setup
-
-1. Go to [https://console.cloud.google.com](https://console.cloud.google.com) and create or select a project
-2. Navigate to **APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID**
-3. Application type: **Web application**
-4. Under **Authorized JavaScript origins**, add:
-   - `http://localhost:5173`
-   - (For iPhone testing on Wi-Fi) `http://<your-laptop-ip>:5173`
-5. Copy the **Client ID** (looks like `123456-xxxx.apps.googleusercontent.com`)
-
-### Environment Variables
-
-**Backend — `backend/.env`:**
-```
-DATABASE_URL=postgres://luba@localhost:5432/icloud_notes
-PORT=3000
-NODE_ENV=development
-JWT_SECRET=<replace-with-a-random-secret-at-least-32-chars>
-GOOGLE_CLIENT_ID=<your-google-client-id>
-```
-
-**Frontend — `frontend/.env.local`** (gitignored):
-```
-VITE_GOOGLE_CLIENT_ID=<your-google-client-id>
-# For iPhone testing on same Wi-Fi, uncomment and set your laptop IP:
-# VITE_API_URL=http://192.168.x.x:3000
-```
-
-### Deploying to Vercel (production login)
-
-1. **Deploy the backend** somewhere (e.g. Railway, Render) and note its URL (e.g. `https://your-app.railway.app`). Set `JWT_SECRET`, `GOOGLE_CLIENT_ID`, and `DATABASE_URL` there.
-
-2. **In Vercel** (frontend project): **Settings → Environment Variables**. Use **one** of these:
-   - **Option A (recommended):** Set `VITE_API_URL` = your backend URL with **no** `/api` (e.g. `https://your-app.railway.app`). Redeploy so the built app uses it.
-   - **Option B:** Set `BACKEND_URL` = same backend URL. The repo includes a serverless proxy (`frontend/api/`) that forwards `/api/*` to this URL so the client can use relative `/api`.
-
-3. **In Vercel** also set `VITE_GOOGLE_CLIENT_ID` = your Google OAuth Web client ID.
-
-4. **In Google Cloud Console** → your OAuth 2.0 Client ID → **Authorized JavaScript origins** add your Vercel URL (e.g. `https://icloud-notesclone.vercel.app`).
-
-5. Redeploy the frontend after changing env vars. Login should then work and not redirect back to the login page.
-
-#### Vercel env vars by environment
-
-For this app, set these in both **Production** and **Preview** unless you intentionally point Preview at a different backend/database.
-
-| Variable | Production | Preview | Notes |
-|----------|------------|---------|-------|
-| `VITE_GOOGLE_CLIENT_ID` | Required | Required | Must match backend `GOOGLE_CLIENT_ID` |
-| `VITE_API_URL` | Optional | Optional | Use for split FE/BE; **do not include `/api`** |
-| `BACKEND_URL` | Optional | Optional | Only if using `frontend/api/[[...path]].ts` proxy |
-| `GOOGLE_CLIENT_ID` | Required if using root `api/*` | Required if using root `api/*` | Used by Vercel serverless auth verify |
-| `JWT_SECRET` | Required if using root `api/*` | Required if using root `api/*` | Signs/verifies app JWT |
-| `DATABASE_URL` | Required if using root `api/*` | Required if using root `api/*` | Postgres connection string |
-| `NODE_ENV` | `production` | `production` | Needed for prod SSL behavior in serverless DB client |
-
-### iPhone Testing (Same Wi-Fi)
-
-1. Find your laptop's local IP: `ipconfig getifaddr en0`
-2. Start backend with `npm run dev` in `backend/`
-3. Start frontend with: `npm run dev -- --host` in `frontend/`
-4. Set `VITE_API_URL=http://<laptop-ip>:3000` in `frontend/.env.local`
-5. Add `http://<laptop-ip>:5173` to Authorized JavaScript origins in Google Cloud Console
-6. Open `http://<laptop-ip>:5173` in Safari on your iPhone
-7. Sign in with the same Google account → same notes appear on both devices
+Derived from the original MIT-compatible work by Luba Kaper. Modifications follow open-source software licensing.

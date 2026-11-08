@@ -6,7 +6,7 @@
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Clone Your Repo & Create Branch
 ```bash
@@ -75,7 +75,7 @@ npm run dev
 
 ---
 
-## 📋 5-Day Sprint Breakdown
+##  5-Day Sprint Breakdown
 
 ### Day 1: Architecture & Setup
 **Goal:** Project structure, database schema, API routes defined
@@ -162,7 +162,7 @@ npm run dev
 
 ---
 
-## 🤖 Using Claude Code with This Project
+##  Using Claude Code with This Project
 
 ### Installation
 ```bash
@@ -189,7 +189,7 @@ claude-code
 
 ---
 
-## 📝 Daily Claude Code Prompts
+##  Daily Claude Code Prompts
 
 ### Day 1: Backend Setup
 ```
@@ -291,7 +291,7 @@ Task: Prepare for deployment:
 
 ---
 
-## 🔧 Tech Stack Reference
+##  Tech Stack Reference
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
@@ -308,7 +308,7 @@ Task: Prepare for deployment:
 
 ---
 
-## 📦 Deliverables Checklist
+##  Deliverables Checklist
 
 ### Day 1
 - [ ] Backend folder created
@@ -342,7 +342,7 @@ Task: Prepare for deployment:
 
 ---
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 **Frontend won't start:**
 ```bash
@@ -371,7 +371,7 @@ git push origin feature/icloud-notes-autosave-backend
 
 ---
 
-## 📞 Next Steps
+##  Next Steps
 
 1. **Share your repo URL** with me
 2. **I'll create a comprehensive README** for your repo
@@ -381,14 +381,14 @@ git push origin feature/icloud-notes-autosave-backend
 
 ---
 
-## 🎯 Success Criteria
+##  Success Criteria
 
-✅ Users can create notes (stored in DB)
-✅ Users can edit notes (autosaved 800ms + blur)
-✅ Users can search notes
-✅ Users can delete notes
-✅ Zero data loss (IndexedDB + server sync)
-✅ Responsive three-column layout
-✅ Deployed to production
+ Users can create notes (stored in DB)
+ Users can edit notes (autosaved 800ms + blur)
+ Users can search notes
+ Users can delete notes
+ Zero data loss (IndexedDB + server sync)
+ Responsive three-column layout
+ Deployed to production
 
-Let's build! 🚀
+Let's build! 

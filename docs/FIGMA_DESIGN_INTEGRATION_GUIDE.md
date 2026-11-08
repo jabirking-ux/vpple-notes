@@ -2,7 +2,7 @@
 
 **iCloud Notes Clone | React/Vite | February 9, 2026**
 
-## 🎉 Good News!
+##  Good News!
 
 Your Figma design is **already fully implemented** as a React/Vite project. All three components (Sidebar, NotesList, NoteViewer) are styled and ready for state management + API integration.
 
@@ -134,17 +134,17 @@ postcss.config.mjs
 
 ## Immediate Action Items
 
-### 1️⃣ Start the Dev Server
+### 1⃣ Start the Dev Server
 ```bash
 npm install
 npm run dev
 ```
 Open `localhost:5173` to view the app.
 
-### 2️⃣ Compare with Figma
+### 2⃣ Compare with Figma
 View the running app side-by-side with your Figma design. **Everything should match!**
 
-### 3️⃣ Move to State Management Phase
+### 3⃣ Move to State Management Phase
 
 **Goal:** Connect the three components so they communicate.
 
@@ -175,7 +175,7 @@ Then wrap `<NotesApp />` with `<NotesProvider>` in App.tsx.
 npm install zustand
 ```
 
-### 4️⃣ Wire Components to State
+### 4⃣ Wire Components to State
 
 **Sidebar.tsx:**
 ```tsx
@@ -326,12 +326,12 @@ export function NoteViewer() {
 
 ## Next Steps (Priority Order)
 
-1. ✅ **Design is done** (you did this in Figma → now in React)
-2. ⏭️ **Add state management** (Context or Zustand)
-3. ⏭️ **Create backend API** (Node/Express or use Firebase)
-4. ⏭️ **Wire components to state** (connect clicks, show data)
-5. ⏭️ **Implement autosave** (debounce + blur triggers)
-6. ⏭️ **Test & deploy**
+1.  **Design is done** (you did this in Figma → now in React)
+2. ⏭ **Add state management** (Context or Zustand)
+3. ⏭ **Create backend API** (Node/Express or use Firebase)
+4. ⏭ **Wire components to state** (connect clicks, show data)
+5. ⏭ **Implement autosave** (debounce + blur triggers)
+6. ⏭ **Test & deploy**
 
 ---
 
@@ -344,4 +344,4 @@ Now focus on:
 - Building/connecting the backend
 - Implementing autosave logic
 
-Everything else is done. 🎯
+Everything else is done. 
