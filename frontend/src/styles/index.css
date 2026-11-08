@@ -3,28 +3,164 @@
 @tailwind utilities;
 
 :root {
-  --notes-bg-sidebar: #1e1e1e;
-  --notes-bg-list: #1c1c1e;
-  --notes-bg-editor: #1e1e1e;
-  --notes-toolbar: #262626;
+  --notes-bg-sidebar: rgba(30, 30, 30, 0.72);
+  --notes-bg-list: rgba(28, 28, 30, 0.78);
+  --notes-bg-editor: rgba(26, 26, 28, 0.85);
+  --notes-toolbar: rgba(38, 38, 38, 0.75);
   --notes-accent: #e5a00d;
   --notes-accent-hover: #f5b800;
-  --notes-border: rgba(255, 255, 255, 0.08);
-  --notes-border-subtle: rgba(255, 255, 255, 0.05);
-  --notes-selection: rgba(229, 160, 13, 0.2);
-  --notes-selection-active: #c28b12;
+  --notes-border: rgba(255, 255, 255, 0.12);
+  --notes-border-subtle: rgba(255, 255, 255, 0.06);
+  --notes-selection: rgba(229, 160, 13, 0.22);
+  --notes-selection-active: #e5a00d;
   --notes-text-primary: #f5f5f7;
   --notes-text-secondary: #86868b;
   --notes-text-muted: #636366;
+
+  /* Volumetric Liquid Glass Optics Tokens (macOS Tahoe & iOS 26) */
+  --liquid-prism-cyan: rgba(0, 240, 255, 0.38);
+  --liquid-prism-magenta: rgba(255, 0, 160, 0.32);
+  --liquid-meniscus: 
+    inset 1px 1px 0 var(--liquid-prism-cyan), 
+    inset -1px -1px 0 var(--liquid-prism-magenta), 
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.60), 
+    inset 0 -1px 1px rgba(0, 0, 0, 0.45);
+  --liquid-shadow-deep: 0 24px 64px -12px rgba(0, 0, 0, 0.65), 0 0 35px -8px rgba(0, 122, 255, 0.20);
+  --liquid-mx: 50%;
+  --liquid-my: 30%;
+  --liquid-angle: 135deg;
 }
 
 body {
   font-family: "SP Pro Display", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Helvetica Neue", Arial, sans-serif;
-  background-color: var(--notes-bg-sidebar);
+  background-color: #12141a;
   color: var(--notes-text-primary);
   user-select: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* macOS Tahoe Atmospheric Desktop Wallpaper Background */
+.tahoe-desktop-bg {
+  background: 
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(88, 86, 214, 0.35), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 85% 25%, rgba(0, 122, 255, 0.30), transparent 65%),
+    radial-gradient(ellipse 90% 70% at 50% 90%, rgba(255, 45, 85, 0.25), transparent 70%),
+    linear-gradient(180deg, #0e1118 0%, #171a24 50%, #0d0f14 100%);
+  background-attachment: fixed;
+}
+
+/* Liquid Glass Volumetric Surface */
+.liquid-glass {
+  position: relative;
+  background: 
+    radial-gradient(circle 500px at var(--liquid-mx) var(--liquid-my), rgba(255, 255, 255, 0.12), transparent 75%),
+    linear-gradient(var(--liquid-angle), rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%),
+    rgba(22, 25, 34, 0.68);
+  backdrop-filter: blur(48px) saturate(220%) contrast(108%) brightness(108%);
+  -webkit-backdrop-filter: blur(48px) saturate(220%) contrast(108%) brightness(108%);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow: 
+    var(--liquid-meniscus),
+    var(--liquid-shadow-deep);
+}
+
+/* Liquid Glass Top Edge Refraction Beam */
+.liquid-glass::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--liquid-prism-cyan) 25%, 
+    rgba(255, 255, 255, 0.95) 50%, 
+    var(--liquid-prism-magenta) 75%, 
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Liquid Glass Floating Toolbar */
+.liquid-glass-toolbar {
+  position: relative;
+  background: 
+    radial-gradient(circle 300px at var(--liquid-mx) 50%, rgba(255, 255, 255, 0.14), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%),
+    rgba(32, 34, 42, 0.75);
+  backdrop-filter: blur(36px) saturate(200%) contrast(105%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%) contrast(105%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.liquid-glass-toolbar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--liquid-prism-cyan) 20%, 
+    rgba(255, 255, 255, 0.9) 50%, 
+    var(--liquid-prism-magenta) 80%, 
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Liquid Glass Interactive Buttons */
+.liquid-glass-btn {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.40),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.liquid-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
+  border-top-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.60),
+    0 4px 14px rgba(0, 0, 0, 0.35),
+    0 0 15px rgba(229, 160, 13, 0.25);
+  transform: translateY(-0.5px);
+}
+
+.liquid-glass-btn:active {
+  transform: translateY(0.5px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Liquid Glass Accent Amber Button */
+.liquid-glass-btn-accent {
+  background: linear-gradient(180deg, #f5b800 0%, #d48806 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.65),
+    0 4px 16px rgba(212, 136, 6, 0.45);
+  color: #000;
+  font-weight: 600;
+}
+
+.liquid-glass-btn-accent:hover {
+  background: linear-gradient(180deg, #ffc519 0%, #e59714 100%);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    0 6px 20px rgba(212, 136, 6, 0.60);
+  transform: translateY(-0.5px);
 }
 
 /* macOS Subtle Scrollbars */
@@ -43,7 +179,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.30);
 }
 
 /* Typography Presets */
@@ -83,20 +219,27 @@ body {
   line-height: 1.55;
   color: #ff9f0a;
   background: rgba(255, 255, 255, 0.05);
-  padding: 2px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
 }
 
 /* Checklists */
 .notes-checklist-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
-  margin: 4px 0;
+  margin: 6px 0;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.notes-checklist-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 .notes-checklist-item.completed {
-  opacity: 0.55;
+  opacity: 0.50;
   text-decoration: line-through;
 }
 
@@ -104,8 +247,10 @@ body {
 .notes-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 12px 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  margin: 14px 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .notes-table th,
@@ -116,7 +261,7 @@ body {
 }
 
 .notes-table th {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   font-weight: 600;
   color: var(--notes-text-primary);
 }

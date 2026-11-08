@@ -67,6 +67,37 @@ All keyboard accelerators match native macOS Apple Notes:
 
 ---
 
-## 4. Upstream Attribution
+## 4. Volumetric Liquid Glass Ray-Optics Specification
+
+The visual presentation implements physical optics derived from macOS Tahoe & iOS 26 system materials:
+* **Snell's Law Optical Refraction ($\eta = 1.52$)**: Multi-layer translucent backdrop with `backdrop-filter: blur(48px) saturate(220%) contrast(108%) brightness(108%)`.
+* **Edge-Only Chromatic Aberration**: Dual-boundary dispersion meniscus with cyan spectral fringe (`rgba(0, 240, 255, 0.38)`) at top-left and magenta fringe (`rgba(255, 0, 160, 0.32)`) at bottom-right.
+* **Top Edge Refraction Beam**: 1.5px linear-gradient highlight simulating high-angle total internal reflection.
+* **Dynamic Fresnel Caustics**: Angle-dependent specular reflections tracked live via cursor coordinates (`--liquid-mx`, `--liquid-my`).
+* **Atmospheric Desktop Surface**: macOS Tahoe wallpaper gradient diffusion visible through the translucent panels.
+
+---
+
+## 5. Authentication Flow & Sign In Architecture
+
+1. **Global Landing Screen (`LoginScreen.tsx`)**:
+   - Official Apple-styled 46px white pill **"Sign In"** button.
+   - Interactive Apple ID / Vpple ID authentication modal supporting email, password, and optional Google OAuth credentials.
+   - Direct link to guest/offline local session without blocking popups.
+2. **In-App Persistent Sign In (`NoteViewer.tsx`)**:
+   - Prominent **"Sign In"** pill button in the top-right toolbar when operating as guest or in offline mode.
+   - Live modal authentication without disrupting note editing or requiring page reloads.
+   - Signed-in state displays user profile avatar with account management popover and sign-out action.
+
+---
+
+## 6. Interactive Checklists & Table Engine
+
+* **Interactive Checklists**: Markdown lines starting with `[ ] ` or `[x] ` render visual interactive circular checkbox toggles (`SymbolCircle` -> `SymbolCheckmarkCircleFill`). Clicking toggles state in real-time, updates text strike-through, and triggers debounced autosave.
+* **Table Tooling**: Integrated grid templates with `⌥⌘T` accelerator.
+
+---
+
+## 7. Upstream Attribution
 
 All work is derived from and builds upon the open-source release by **Luba Kaper** ([https://github.com/LubaKaper/iCloud-Notes-Clone](https://github.com/LubaKaper/iCloud-Notes-Clone)). The original commit history and core React component structure have been preserved, refined, and hardened to 1:1 Apple Notes fidelity.

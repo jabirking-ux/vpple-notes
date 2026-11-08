@@ -42,7 +42,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       {
         id: 'welcome-apple-notes',
         title: 'Welcome to Vpple Notes',
-        body: 'Welcome to Vpple Notes\nAn exact 1:1 reverse-engineered implementation of Apple Notes.\n\nKey features:\n• 3-column supplemental split view\n• Pure vector SF Symbols with zero emojis\n• Interactive checklists and tables\n• Real-time autosave with offline IndexedDB storage\n• macOS Tahoe & Sequoia Dark Theme styling',
+        body: 'Welcome to Vpple Notes\nAn exact 1:1 reverse-engineered implementation of Apple Notes with macOS Tahoe Liquid Glass optics.\n\n[ ] Test interactive checklist toggle\n[x] Volumetric Liquid Glass refraction (Snell\'s Law n=1.52)\n[x] Native Apple SF Symbols (Zero emojis policy)\n[x] Dynamic amber gold selection highlight (#e5a00d)\n[ ] Create your first new folder (⇧⌘N)',
         revision: 1,
         folderId: 'notes-folder',
         isPinned: true,

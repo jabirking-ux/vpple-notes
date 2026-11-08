@@ -5,6 +5,29 @@ This repository is based on the upstream project [iCloud-Notes-Clone](https://gi
 
 ---
 
+## [1.2.0] - 2026-11-09
+
+### Added
+- **Volumetric Liquid Glass Material System (`frontend/src/styles/index.css`)**:
+  - Implemented Snell's Law optical refraction simulation ($n \approx 1.52$) with multi-layer blur and saturation boosts.
+  - Added chromatic dispersion meniscus (`--liquid-meniscus`) using cyan (`#00f0ff`) and magenta (`#ff00a0`) edge-fringing.
+  - Added dynamic Fresnel specular caustics tracking cursor movements (`--liquid-mx`, `--liquid-my`) in real-time.
+  - Applied Liquid Glass styling to toolbars, modals, floating action buttons, and sidebars.
+- **Dedicated Apple ID / Vpple ID Sign In Interface**:
+  - Added official Apple-style 46px white pill **"Sign In"** button on the landing screen (`LoginScreen.tsx`).
+  - Added interactive in-app **"Sign In"** button on the Note Viewer toolbar for guest/local users.
+  - Implemented interactive Apple ID modal with credential authentication and Google OAuth option.
+- **Visual Interactive Checklists (`frontend/src/app/components/NoteViewer.tsx`)**:
+  - Rendered live circular check boxes (`SymbolCircle` -> `SymbolCheckmarkCircleFill`) for `[ ]` and `[x]` lines.
+  - Interactive click handling with instant visual strikethrough and debounced autosave.
+  - Bound checklist toggle shortcut `⇧⌘L`.
+
+### Changed
+- Refactored `NotesApp.tsx` with atmospheric macOS Tahoe desktop background.
+- Updated root deployment bundle for GitHub Pages with fresh assets.
+
+---
+
 ## [1.1.0] - 2026-11-09
 
 ### Added

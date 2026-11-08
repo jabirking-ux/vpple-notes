@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { googleAuth } from '../../utils/api';
-import { SymbolVpplePeach } from './SFSymbols';
+import { SymbolVpplePeach, SymbolChevronRight, SymbolXmark, SymbolLockFill } from './SFSymbols';
 
 declare global {
   interface Window {
@@ -25,9 +25,28 @@ declare global {
 
 export function LoginScreen() {
   const { login } = useAuth();
-  const buttonRef = useRef<HTMLDivElement>(null);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const googleBtnRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleContinueLocal = () => {
+  // Mouse-tracking for dynamic Snell's Law specular sheen
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      containerRef.current.style.setProperty('--liquid-mx', `${x.toFixed(1)}%`);
+      containerRef.current.style.setProperty('--liquid-my', `${y.toFixed(1)}%`);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const handleLocalSignIn = () => {
     login('local-token', {
       id: 'local-user',
       name: 'Vpple User',
@@ -36,12 +55,26 @@ export function LoginScreen() {
     });
   };
 
-  useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
-    if (!clientId) {
-      // Offline / Local mode without OAuth alert spam
+  const handleCustomSignIn = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setErrorMsg('Please enter your Vpple ID or email');
       return;
     }
+    const cleanEmail = email.trim();
+    const namePart = cleanEmail.split('@')[0];
+    const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+    login(`token-${Date.now()}`, {
+      id: `user-${Date.now()}`,
+      name: formattedName,
+      email: cleanEmail,
+      pictureUrl: null,
+    });
+  };
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+    if (!clientId) return;
 
     const init = () => {
       if (!window.google?.accounts?.id) {
@@ -57,16 +90,16 @@ export function LoginScreen() {
             login(token, user);
           } catch (err: any) {
             console.error('Sign-in failed:', err);
-            handleContinueLocal();
+            handleLocalSignIn();
           }
         },
       });
 
-      if (buttonRef.current) {
-        window.google.accounts.id.renderButton(buttonRef.current, {
+      if (googleBtnRef.current) {
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
           theme: 'filled_black',
           size: 'large',
-          width: 220,
+          width: 280,
         });
       }
     };
@@ -75,53 +108,158 @@ export function LoginScreen() {
   }, [login]);
 
   return (
-    <div className="relative min-h-screen bg-[#1c1c1e] flex flex-col items-center justify-center px-6 select-none">
-      {/* Top Left Vpple Branding */}
-      <div className="absolute top-5 left-6 flex items-center gap-2">
-        <SymbolVpplePeach className="w-5 h-5 text-white/80" />
-        <span className="text-white/90 text-sm font-medium tracking-wide">Vpple iCloud</span>
-      </div>
-
-      <div className="flex flex-col items-center text-center max-w-sm">
-        {/* Apple Notes Icon with Golden Gradient */}
-        <div
-          className="w-24 h-24 rounded-[22px] flex flex-col justify-center items-center gap-2 shadow-2xl relative overflow-hidden"
-          style={{ background: 'linear-gradient(180deg, #ffd60a 0%, #d48806 100%)' }}
+    <div
+      ref={containerRef}
+      className="relative min-h-screen tahoe-desktop-bg flex flex-col items-center justify-center px-6 select-none overflow-hidden"
+    >
+      {/* Top Left Global Navigation Bar */}
+      <header className="absolute top-0 left-0 right-0 h-12 px-6 flex items-center justify-between z-30 border-b border-white/10 bg-black/30 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <SymbolVpplePeach className="w-5 h-5 text-white/90" />
+          <span className="text-white text-[13px] font-semibold tracking-wide">iCloud Notes</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowSignInModal(true)}
+          className="liquid-glass-btn px-4 py-1 text-[13px] font-semibold text-white rounded-full flex items-center gap-1.5 cursor-pointer"
         >
-          {/* Top amber strip */}
-          <div className="w-16 h-3 bg-[#ffeaa0] rounded-sm opacity-90 shadow-sm" />
+          <span>Sign In</span>
+        </button>
+      </header>
+
+      {/* Hero Volumetric Liquid Glass Card */}
+      <main className="liquid-glass rounded-3xl p-10 max-w-md w-full flex flex-col items-center text-center shadow-2xl relative z-20 mt-8">
+        {/* Apple Notes Icon with Golden Liquid Gradient & Bevel */}
+        <div
+          className="w-24 h-24 rounded-[22px] flex flex-col justify-center items-center gap-2 shadow-2xl relative overflow-hidden transition-transform hover:scale-105"
+          style={{
+            background: 'linear-gradient(180deg, #ffd60a 0%, #e59714 50%, #b87104 100%)',
+            boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 12px 32px rgba(229, 160, 13, 0.4)'
+          }}
+        >
+          {/* Top light strip */}
+          <div className="w-16 h-3 bg-[#fff3bf] rounded-sm opacity-95 shadow-sm" />
           {/* Lined paper lines */}
           <div className="flex flex-col gap-1.5 w-14">
-            <div className="h-0.5 bg-[#7c4d00] rounded-full opacity-60" />
-            <div className="h-0.5 bg-[#7c4d00] rounded-full opacity-60" />
-            <div className="h-0.5 bg-[#7c4d00] rounded-full opacity-60" />
+            <div className="h-0.5 bg-[#6b4100] rounded-full opacity-65" />
+            <div className="h-0.5 bg-[#6b4100] rounded-full opacity-65" />
+            <div className="h-0.5 bg-[#6b4100] rounded-full opacity-65" />
           </div>
         </div>
 
         {/* Title */}
-        <h1 className="mt-7 text-white font-bold tracking-tight text-4xl">
+        <h1 className="mt-6 text-white font-bold tracking-tight text-4xl">
           Notes
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-3 text-[#86868b] text-[15px] leading-relaxed">
-          Capture thoughts, checklists, and rich tables. Your notes are stored securely and remain accessible offline.
+        <p className="mt-3 text-[#d1d1d6] text-[15px] leading-relaxed max-w-xs">
+          Capture thoughts, interactive checklists, and tables with macOS Tahoe Liquid Glass optics.
         </p>
 
-        {/* Action Controls */}
+        {/* Prominent Official Apple "Sign In" Button */}
         <div className="mt-8 flex flex-col items-center gap-3 w-full">
           <button
             type="button"
-            onClick={handleContinueLocal}
-            className="w-[220px] h-[44px] bg-[#e5a00d] hover:bg-[#d4940c] text-white font-semibold text-[14px] rounded-xl flex items-center justify-center transition-colors shadow-lg cursor-pointer"
+            onClick={() => setShowSignInModal(true)}
+            className="w-[260px] h-[46px] bg-white hover:bg-[#f2f2f7] text-[#1c1c1e] font-semibold text-[15px] rounded-full flex items-center justify-center transition-all shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
-            Open Notes
+            Sign In
           </button>
 
-          {/* Optional OAuth Container if VITE_GOOGLE_CLIENT_ID exists */}
-          <div ref={buttonRef} className="w-[220px] flex justify-center" />
+          {/* Quick Offline / Guest Access */}
+          <button
+            type="button"
+            onClick={handleLocalSignIn}
+            className="text-[13px] text-[#e5a00d] hover:text-[#ffc519] transition-colors mt-2 cursor-pointer font-medium"
+          >
+            Continue in Guest / Offline Mode &rsaquo;
+          </button>
         </div>
-      </div>
+      </main>
+
+      {/* Interactive Apple ID / Vpple ID Sign In Modal */}
+      {showSignInModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="liquid-glass rounded-2xl max-w-sm w-full p-6 relative shadow-2xl animate-slide-in">
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowSignInModal(false)}
+              className="absolute top-4 right-4 p-1 text-[#86868b] hover:text-white rounded-full hover:bg-white/10"
+              aria-label="Close"
+            >
+              <SymbolXmark className="w-4 h-4" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
+                <SymbolLockFill className="w-6 h-6 text-[#e5a00d]" />
+              </div>
+              <h2 className="text-white text-[20px] font-bold">Sign in with Apple ID</h2>
+              <p className="text-[#86868b] text-[13px] mt-1">
+                Enter your Vpple ID or Apple ID to continue.
+              </p>
+            </div>
+
+            {/* Sign In Form */}
+            <form onSubmit={handleCustomSignIn} className="space-y-3">
+              <div>
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Apple ID or Email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  className="w-full bg-[#1c1c1e]/80 border border-white/20 rounded-xl px-3.5 py-2.5 text-white text-[14px] outline-none focus:border-[#e5a00d] transition-colors placeholder:text-[#636366]"
+                />
+              </div>
+
+              <div>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-[#1c1c1e]/80 border border-white/20 rounded-xl px-3.5 py-2.5 text-white text-[14px] outline-none focus:border-[#e5a00d] transition-colors placeholder:text-[#636366]"
+                />
+              </div>
+
+              {errorMsg && (
+                <div className="text-[#ff453a] text-[12px] text-center font-medium">
+                  {errorMsg}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full h-11 bg-[#e5a00d] hover:bg-[#d4940c] text-white font-semibold text-[14px] rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg cursor-pointer"
+              >
+                <span>Continue</span>
+                <SymbolChevronRight className="w-4 h-4" />
+              </button>
+            </form>
+
+            {/* Google OAuth Button Container */}
+            <div ref={googleBtnRef} className="mt-4 flex justify-center w-full" />
+
+            {/* Offline Fallback inside Modal */}
+            <div className="mt-5 pt-4 border-t border-white/10 text-center">
+              <button
+                type="button"
+                onClick={handleLocalSignIn}
+                className="text-[13px] text-[#86868b] hover:text-white transition-colors cursor-pointer"
+              >
+                Use Local Notes Without Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

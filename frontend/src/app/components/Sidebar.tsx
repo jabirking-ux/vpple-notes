@@ -103,12 +103,16 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 w-[240px] flex-shrink-0 bg-[#1e1e1e] border-r border-white/10 flex flex-col transition-transform select-none md:static md:z-auto md:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-50 w-[240px] flex-shrink-0 border-r border-white/10 flex flex-col transition-transform select-none md:static md:z-auto md:translate-x-0 ${
         open ? 'translate-x-0' : '-translate-x-full'
       }`}
+      style={{
+        background: 'rgba(22, 24, 32, 0.72)',
+        backdropFilter: 'blur(40px) saturate(200%)',
+      }}
     >
       {/* macOS Window Controls + App Identity */}
-      <div className="h-12 px-4 border-b border-white/5 flex items-center justify-between">
+      <div className="liquid-glass-toolbar h-12 px-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <SymbolTrafficLights />
           <div className="flex items-center gap-1.5 ml-2">

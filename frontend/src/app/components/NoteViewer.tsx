@@ -5,6 +5,8 @@ import { useAuth } from '../../context/AuthContext';
 import { syncUpdateNote, syncDeleteNote, syncFetchNotes, syncCreateNote } from '../../utils/offlineSync';
 import {
   SymbolChecklist,
+  SymbolCircle,
+  SymbolCheckmarkCircleFill,
   SymbolTableCells,
   SymbolTextFormat,
   SymbolTrash,
@@ -12,7 +14,9 @@ import {
   SymbolSquareAndArrowUp,
   SymbolLockFill,
   SymbolChevronLeft,
-  SymbolXmark
+  SymbolXmark,
+  SymbolVpplePeach,
+  SymbolChevronRight
 } from './SFSymbols';
 
 interface NoteViewerProps {
@@ -39,14 +43,17 @@ function formatFullTimestamp(iso?: string): string {
 export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) {
   const { notes, setNotes, selectedNote, setSelectedNote, selectedFolder } = useNotes();
   const { addToast } = useToast();
-  const { user, logout } = useAuth();
+  const { user, login, logout } = useAuth();
 
   const [title, setTitle] = useState('');
   const [restBody, setRestBody] = useState('');
   const [isFormatOpen, setIsFormatOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
 
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
@@ -121,7 +128,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
       if (selectedNote) {
         saveNote(selectedNote.id, fullBody, selectedNote.revision || 1);
       }
-    }, 600);
+    }, 500);
   }, [saveNote, selectedNote]);
 
   const handleTitleChange = (newTitle: string) => {
@@ -187,28 +194,37 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
     }
   };
 
-  // Insert Checklist Item
+  // Insert Interactive Checklist item
   const insertChecklist = () => {
-    const checklistTemplate = `\n[ ] `;
-    setRestBody((prev) => {
-      const updated = prev + checklistTemplate;
-      const full = getFullBody(title, updated);
-      scheduleSave(full);
-      return updated;
-    });
-    setTimeout(() => bodyRef.current?.focus(), 50);
+    const checklistLine = '\n[ ] Checklist item';
+    const updated = restBody + checklistLine;
+    setRestBody(updated);
+    const full = getFullBody(title, updated);
+    scheduleSave(full);
+  };
+
+  // Toggle checklist item at line index
+  const toggleChecklistLine = (lineIndex: number) => {
+    const lines = restBody.split('\n');
+    const targetLine = lines[lineIndex];
+    if (targetLine.startsWith('[ ] ')) {
+      lines[lineIndex] = '[x] ' + targetLine.slice(4);
+    } else if (targetLine.startsWith('[x] ')) {
+      lines[lineIndex] = '[ ] ' + targetLine.slice(4);
+    }
+    const updated = lines.join('\n');
+    setRestBody(updated);
+    const full = getFullBody(title, updated);
+    scheduleSave(full);
   };
 
   // Insert Table Template
   const insertTable = () => {
-    const tableTemplate = `\n| Column 1 | Column 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n`;
-    setRestBody((prev) => {
-      const updated = prev + tableTemplate;
-      const full = getFullBody(title, updated);
-      scheduleSave(full);
-      return updated;
-    });
-    setTimeout(() => bodyRef.current?.focus(), 50);
+    const tableTemplate = `\n| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n`;
+    const updated = restBody + tableTemplate;
+    setRestBody(updated);
+    const full = getFullBody(title, updated);
+    scheduleSave(full);
   };
 
   // Keyboard Shortcuts: Cmd+N (New Note), Shift+Cmd+L (Checklist), Opt+Cmd+T (Table)
@@ -229,20 +245,46 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleCreateNote, insertChecklist, insertTable]);
 
+  // Auth Handler from inside App
+  const handleAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authEmail.trim()) return;
+    const namePart = authEmail.trim().split('@')[0];
+    const formatted = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+    login(`token-${Date.now()}`, {
+      id: `user-${Date.now()}`,
+      name: formatted,
+      email: authEmail.trim(),
+      pictureUrl: null,
+    });
+    setIsSignInModalOpen(false);
+    addToast(`Signed in as ${formatted}`, 'success');
+  };
+
+  const isGuest = !user?.email;
+
+  // Split lines to detect interactive checklist items
+  const bodyLines = restBody.split('\n');
+  const hasInteractiveChecklists = bodyLines.some((l) => l.startsWith('[ ] ') || l.startsWith('[x] '));
+
   return (
     <main
       className={`${
         mobileView === 'list' ? 'hidden md:flex' : 'flex'
-      } flex-col flex-1 bg-[#1e1e1e] h-full overflow-hidden select-text`}
+      } flex-col flex-1 h-full overflow-hidden select-text relative`}
+      style={{
+        background: 'rgba(26, 28, 36, 0.75)',
+        backdropFilter: 'blur(40px) saturate(200%)',
+      }}
     >
-      {/* Apple Notes Top Action Toolbar */}
-      <header className="h-12 px-4 border-b border-white/10 flex items-center justify-between select-none bg-[#262626]/80 backdrop-blur-md z-20">
+      {/* Liquid Glass Top Action Toolbar */}
+      <header className="liquid-glass-toolbar h-12 px-4 flex items-center justify-between select-none z-20">
         {/* Left Section */}
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => onMobileViewChange('list')}
-            className="md:hidden p-1.5 text-[#e5a00d] hover:bg-white/5 rounded-md cursor-pointer"
+            className="md:hidden p-1.5 text-[#e5a00d] hover:bg-white/10 rounded-md cursor-pointer"
             title="Back to Notes"
           >
             <SymbolChevronLeft className="w-5 h-5" />
@@ -251,20 +293,20 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
             type="button"
             onClick={handleDeleteNote}
             disabled={!selectedNote}
-            className="p-1.5 text-[#86868b] hover:text-[#ff453a] hover:bg-white/5 rounded-md cursor-pointer disabled:opacity-30"
+            className="p-1.5 text-[#86868b] hover:text-[#ff453a] hover:bg-white/10 rounded-md cursor-pointer disabled:opacity-30 transition-colors"
             title="Delete Note"
           >
             <SymbolTrash className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Center Formatting Controls */}
-        <div className="flex items-center gap-1">
+        {/* Center Formatting Controls with Liquid Glass styling */}
+        <div className="flex items-center gap-1.5">
           {/* Checklist Button */}
           <button
             type="button"
             onClick={insertChecklist}
-            className="p-1.5 text-[#86868b] hover:text-[#e5a00d] hover:bg-white/5 rounded-md transition-colors cursor-pointer"
+            className="liquid-glass-btn p-1.5 text-[#86868b] hover:text-[#e5a00d] rounded-md transition-colors cursor-pointer"
             title="Checklist (⇧⌘L)"
           >
             <SymbolChecklist className="w-4 h-4" />
@@ -274,7 +316,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
           <button
             type="button"
             onClick={insertTable}
-            className="p-1.5 text-[#86868b] hover:text-[#e5a00d] hover:bg-white/5 rounded-md transition-colors cursor-pointer"
+            className="liquid-glass-btn p-1.5 text-[#86868b] hover:text-[#e5a00d] rounded-md transition-colors cursor-pointer"
             title="Insert Table (⌥⌘T)"
           >
             <SymbolTableCells className="w-4 h-4" />
@@ -285,10 +327,8 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
             <button
               type="button"
               onClick={() => setIsFormatOpen(!isFormatOpen)}
-              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                isFormatOpen
-                  ? 'bg-white/10 text-[#e5a00d]'
-                  : 'text-[#86868b] hover:text-[#e5a00d] hover:bg-white/5'
+              className={`liquid-glass-btn p-1.5 rounded-md transition-colors cursor-pointer ${
+                isFormatOpen ? 'text-[#e5a00d] border-[#e5a00d]/50' : 'text-[#86868b] hover:text-[#e5a00d]'
               }`}
               title="Text Styles (Aa)"
             >
@@ -296,7 +336,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
             </button>
 
             {isFormatOpen && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 bg-[#2c2c2e] border border-white/10 rounded-xl shadow-2xl p-1.5 z-50">
+              <div className="liquid-glass absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-xl shadow-2xl p-1.5 z-50 animate-slide-in">
                 <button
                   type="button"
                   onClick={() => {
@@ -329,9 +369,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsFormatOpen(false);
-                  }}
+                  onClick={() => setIsFormatOpen(false)}
                   className="w-full text-left px-3 py-1.5 text-[13px] text-[#86868b] hover:bg-white/10 rounded-md"
                 >
                   Body
@@ -352,8 +390,8 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
           </div>
         </div>
 
-        {/* Right Action Icons */}
-        <div className="flex items-center gap-1.5">
+        {/* Right Section: Sign In Button / Account + Actions */}
+        <div className="flex items-center gap-2">
           {/* Lock Note */}
           <button
             type="button"
@@ -361,8 +399,8 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
               setIsLocked(!isLocked);
               addToast(isLocked ? 'Note unlocked' : 'Note locked', 'info');
             }}
-            className={`p-1.5 rounded-md cursor-pointer ${
-              isLocked ? 'text-[#e5a00d]' : 'text-[#86868b] hover:text-white hover:bg-white/5'
+            className={`p-1.5 rounded-md cursor-pointer transition-colors ${
+              isLocked ? 'text-[#e5a00d]' : 'text-[#86868b] hover:text-white hover:bg-white/10'
             }`}
             title="Lock Note"
           >
@@ -373,7 +411,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
           <button
             type="button"
             onClick={() => setIsShareModalOpen(true)}
-            className="p-1.5 text-[#86868b] hover:text-white hover:bg-white/5 rounded-md cursor-pointer"
+            className="p-1.5 text-[#86868b] hover:text-white hover:bg-white/10 rounded-md cursor-pointer transition-colors"
             title="Share Note"
           >
             <SymbolSquareAndArrowUp className="w-4 h-4" />
@@ -383,46 +421,59 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
           <button
             type="button"
             onClick={handleCreateNote}
-            className="p-1.5 text-[#e5a00d] hover:bg-white/5 rounded-md cursor-pointer ml-1"
+            className="liquid-glass-btn p-1.5 text-[#e5a00d] rounded-md cursor-pointer"
             title="New Note (⌘N)"
           >
             <SymbolSquareAndPencil className="w-4 h-4" />
           </button>
 
-          {/* Account Profile Avatar */}
-          <div className="relative ml-1">
+          {/* Sign In Button / Account Profile Popover */}
+          {isGuest ? (
             <button
               type="button"
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="w-7 h-7 rounded-full bg-[#3a3a3c] border border-white/10 flex items-center justify-center text-[11px] font-semibold text-white/90 cursor-pointer hover:border-[#e5a00d] transition-colors"
-              title="Account"
+              onClick={() => setIsSignInModalOpen(true)}
+              className="liquid-glass-btn px-3 py-1 text-[12.5px] font-semibold text-white rounded-full flex items-center gap-1.5 cursor-pointer ml-1 hover:border-[#e5a00d]"
+              title="Sign in with Apple ID"
             >
-              {user?.pictureUrl ? (
-                <img src={user.pictureUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-              ) : (
-                <span>{user?.name ? user.name[0].toUpperCase() : 'V'}</span>
-              )}
+              <SymbolVpplePeach className="w-3.5 h-3.5 text-[#e5a00d]" />
+              <span>Sign In</span>
             </button>
+          ) : (
+            <div className="relative ml-1">
+              <button
+                type="button"
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="w-7 h-7 rounded-full bg-[#3a3a3c] border border-white/20 flex items-center justify-center text-[11px] font-semibold text-white cursor-pointer hover:border-[#e5a00d] transition-colors"
+                title="Account Settings"
+              >
+                {user?.pictureUrl ? (
+                  <img src={user.pictureUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <span>{user?.name ? user.name[0].toUpperCase() : 'V'}</span>
+                )}
+              </button>
 
-            {profileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-[#2c2c2e] border border-white/10 rounded-xl shadow-2xl p-2 z-50">
-                <div className="px-2 py-1.5 border-b border-white/10 mb-1">
-                  <div className="text-[13px] font-semibold text-white truncate">{user?.name || 'Vpple Account'}</div>
-                  <div className="text-[11px] text-[#86868b] truncate">{user?.email || 'Local Storage Session'}</div>
+              {profileOpen && (
+                <div className="liquid-glass absolute right-0 top-full mt-2 w-56 rounded-xl shadow-2xl p-2 z-50 animate-slide-in">
+                  <div className="px-2 py-1.5 border-b border-white/10 mb-1">
+                    <div className="text-[13px] font-semibold text-white truncate">{user?.name || 'Vpple Account'}</div>
+                    <div className="text-[11px] text-[#86868b] truncate">{user?.email || 'Authenticated'}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileOpen(false);
+                      logout();
+                      addToast('Signed out', 'info');
+                    }}
+                    className="w-full text-left px-2 py-1.5 text-[12px] text-[#ff453a] hover:bg-white/10 rounded-md cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProfileOpen(false);
-                    logout();
-                  }}
-                  className="w-full text-left px-2 py-1.5 text-[12px] text-[#ff453a] hover:bg-white/5 rounded-md cursor-pointer"
-                >
-                  Sign Out
-                </button>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -453,6 +504,45 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
                 spellCheck={false}
               />
 
+              {/* Interactive Checklists Section (if checklists are present) */}
+              {hasInteractiveChecklists && (
+                <div className="mb-4 p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                  <div className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <SymbolChecklist className="w-3.5 h-3.5 text-[#e5a00d]" />
+                    <span>Interactive Checklist</span>
+                  </div>
+                  <div className="space-y-1">
+                    {bodyLines.map((line, idx) => {
+                      if (line.startsWith('[ ] ')) {
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => toggleChecklistLine(idx)}
+                            className="notes-checklist-item cursor-pointer group"
+                          >
+                            <SymbolCircle className="w-4 h-4 text-[#86868b] group-hover:text-[#e5a00d] flex-shrink-0 transition-colors" />
+                            <span className="text-[14px] text-[#f5f5f7] leading-snug">{line.slice(4)}</span>
+                          </div>
+                        );
+                      }
+                      if (line.startsWith('[x] ')) {
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => toggleChecklistLine(idx)}
+                            className="notes-checklist-item completed cursor-pointer group"
+                          >
+                            <SymbolCheckmarkCircleFill className="w-4 h-4 text-[#e5a00d] flex-shrink-0" />
+                            <span className="text-[14px] text-[#86868b] line-through leading-snug">{line.slice(4)}</span>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Body Textarea */}
               <textarea
                 ref={bodyRef}
@@ -479,10 +569,61 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
         </div>
       </div>
 
+      {/* In-App Apple ID / Vpple ID Sign In Modal */}
+      {isSignInModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="liquid-glass rounded-2xl max-w-sm w-full p-6 relative shadow-2xl animate-slide-in">
+            <button
+              type="button"
+              onClick={() => setIsSignInModalOpen(false)}
+              className="absolute top-4 right-4 p-1 text-[#86868b] hover:text-white rounded-full hover:bg-white/10"
+              aria-label="Close"
+            >
+              <SymbolXmark className="w-4 h-4" />
+            </button>
+
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
+                <SymbolLockFill className="w-6 h-6 text-[#e5a00d]" />
+              </div>
+              <h2 className="text-white text-[20px] font-bold">Sign in with Apple ID</h2>
+              <p className="text-[#86868b] text-[13px] mt-1">
+                Sync notes across devices and web with your Vpple account.
+              </p>
+            </div>
+
+            <form onSubmit={handleAuthSubmit} className="space-y-3">
+              <input
+                type="text"
+                autoFocus
+                placeholder="Apple ID or Email"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                className="w-full bg-[#1c1c1e]/80 border border-white/20 rounded-xl px-3.5 py-2.5 text-white text-[14px] outline-none focus:border-[#e5a00d] placeholder:text-[#636366]"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                className="w-full bg-[#1c1c1e]/80 border border-white/20 rounded-xl px-3.5 py-2.5 text-white text-[14px] outline-none focus:border-[#e5a00d] placeholder:text-[#636366]"
+              />
+              <button
+                type="submit"
+                className="w-full h-11 bg-[#e5a00d] hover:bg-[#d4940c] text-white font-semibold text-[14px] rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg cursor-pointer"
+              >
+                <span>Sign In</span>
+                <SymbolChevronRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Share Dialog */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-[#2c2c2e] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="liquid-glass rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-slide-in">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white text-[16px] font-semibold">Share Note</h3>
               <button
@@ -494,7 +635,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
               </button>
             </div>
             <p className="text-[#86868b] text-[13px] mb-4">
-              Collaborate or send a copy of this note.
+              Collaborate or export a copy of this note.
             </p>
             <div className="space-y-2">
               <button
@@ -504,14 +645,14 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
                   addToast('Note content copied to clipboard', 'success');
                   setIsShareModalOpen(false);
                 }}
-                className="w-full py-2 bg-[#e5a00d] text-white rounded-lg text-[13px] font-semibold hover:bg-[#d4940c] transition-colors"
+                className="w-full py-2 bg-[#e5a00d] text-white rounded-lg text-[13px] font-semibold hover:bg-[#d4940c] transition-colors cursor-pointer"
               >
                 Copy Note Text
               </button>
               <button
                 type="button"
                 onClick={() => setIsShareModalOpen(false)}
-                className="w-full py-2 bg-white/5 text-[#f5f5f7] rounded-lg text-[13px] hover:bg-white/10 transition-colors"
+                className="w-full py-2 bg-white/5 text-[#f5f5f7] rounded-lg text-[13px] hover:bg-white/10 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
