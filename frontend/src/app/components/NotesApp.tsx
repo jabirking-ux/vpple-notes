@@ -14,15 +14,13 @@ export function NotesApp() {
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
   const appContainerRef = useRef<HTMLDivElement>(null);
 
-  // Dynamic Snell's Law specular sheen mouse tracking
+  // Dynamic Kyant0 InteractiveHighlight cursor tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!appContainerRef.current) return;
-      const rect = appContainerRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      appContainerRef.current.style.setProperty('--liquid-mx', `${x.toFixed(1)}%`);
-      appContainerRef.current.style.setProperty('--liquid-my', `${y.toFixed(1)}%`);
+      const x = ((e.clientX / window.innerWidth) * 100).toFixed(1);
+      const y = ((e.clientY / window.innerHeight) * 100).toFixed(1);
+      document.documentElement.style.setProperty('--lx', `${x}%`);
+      document.documentElement.style.setProperty('--ly', `${y}%`);
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);

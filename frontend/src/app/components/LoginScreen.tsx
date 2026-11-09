@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { googleAuth } from '../../utils/api';
 import { SymbolVpplePeach, SymbolChevronRight, SymbolXmark, SymbolLockFill } from './SFSymbols';
+import { LiquidGlassButton } from './LiquidGlassContainer';
 
 declare global {
   interface Window {
@@ -32,15 +33,13 @@ export function LoginScreen() {
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Mouse-tracking for dynamic Snell's Law specular sheen
+  // Mouse-tracking for dynamic Kyant0 InteractiveHighlight specular sheen
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      containerRef.current.style.setProperty('--liquid-mx', `${x.toFixed(1)}%`);
-      containerRef.current.style.setProperty('--liquid-my', `${y.toFixed(1)}%`);
+      const x = ((e.clientX / window.innerWidth) * 100).toFixed(1);
+      const y = ((e.clientY / window.innerHeight) * 100).toFixed(1);
+      document.documentElement.style.setProperty('--lx', `${x}%`);
+      document.documentElement.style.setProperty('--ly', `${y}%`);
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
@@ -118,13 +117,13 @@ export function LoginScreen() {
           <SymbolVpplePeach className="w-5 h-5 text-white/90" />
           <span className="text-white text-[13px] font-semibold tracking-wide">iCloud Notes</span>
         </div>
-        <button
+        <LiquidGlassButton
           type="button"
           onClick={() => setShowSignInModal(true)}
-          className="liquid-glass-btn px-4 py-1.5 text-[13px] font-semibold text-white rounded-full flex items-center gap-1.5 cursor-pointer"
+          className="px-4 py-1.5 text-[13px] font-semibold text-white"
         >
           <span>Sign In</span>
-        </button>
+        </LiquidGlassButton>
       </header>
 
       {/* Hero Liquid Glass Card */}

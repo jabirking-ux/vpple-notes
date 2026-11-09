@@ -10,9 +10,15 @@ Hosted live on GitHub Pages: [https://jabirking-ux.github.io/vpple-notes/](https
 
 ## Upstream Attribution & Provenance
 
-* **Upstream Repository:** [https://github.com/LubaKaper/iCloud-Notes-Clone](https://github.com/LubaKaper/iCloud-Notes-Clone)
-* **Upstream Author:** Luba Kaper (`liubovkaper@pursuit.org`)
-* **Base Commit:** `ea176c0ca4d33bc6f323e2873d43dae6ad8eb9e9` (Increase note body font size for presentation)
+* **iCloud Notes Base Implementation:** [https://github.com/LubaKaper/iCloud-Notes-Clone](https://github.com/LubaKaper/iCloud-Notes-Clone) by Luba Kaper (`liubovkaper@pursuit.org`)  
+  Base Commit: `ea176c0ca4d33bc6f323e2873d43dae6ad8eb9e9` (Increase note body font size for presentation)
+* **Real Liquid Glass Shader Architecture & Code:** [https://github.com/Kyant0/AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass) by Kyant (Apache License 2.0)  
+  Directly incorporates the exact mathematical shaders from `Kyant0/AndroidLiquidGlass`:
+  - `RoundedRectSDF`: `sdRoundedRect` and `gradSdRoundedRect`
+  - `circleMap(x) = 1.0 - sqrt(1.0 - x * x)` for lens refraction displacement
+  - `DefaultHighlightShaderString`: Directional normal-dot-gradient specular sheen (`pow(abs(dot(grad, normal)), falloff)`)
+  - `InteractiveHighlight`: Cursor tracking for real-time specular highlights on buttons and toolbars
+  - Implemented in [`frontend/src/utils/KyantLiquidGlass.ts`](./frontend/src/utils/KyantLiquidGlass.ts) and [`frontend/src/app/components/LiquidGlassContainer.tsx`](./frontend/src/app/components/LiquidGlassContainer.tsx)
 
 All architectural differences, token audits, and reverse engineering decisions are documented in detail in [REVERSE_ENGINEERING.md](./REVERSE_ENGINEERING.md). For revision history, see [CHANGELOG.md](./CHANGELOG.md).
 

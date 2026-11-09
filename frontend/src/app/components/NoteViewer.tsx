@@ -3,6 +3,7 @@ import { useNotes, Note } from '../../context/NotesContext';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { syncUpdateNote, syncDeleteNote, syncFetchNotes, syncCreateNote } from '../../utils/offlineSync';
+import { LiquidGlassButton } from './LiquidGlassContainer';
 import {
   SymbolChecklist,
   SymbolCircle,
@@ -52,6 +53,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
 
@@ -157,6 +159,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
       const newNote = await syncCreateNote('New Note\n', folderId);
       setNotes((prev) => [newNote, ...prev]);
       setSelectedNote(newNote);
+      setIsEditing(true);
       localStorage.setItem('selectedNoteId', newNote.id);
       setTimeout(() => titleRef.current?.focus(), 50);
     } catch {
@@ -171,6 +174,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
       };
       setNotes((prev) => [localNote, ...prev]);
       setSelectedNote(localNote);
+      setIsEditing(true);
       localStorage.setItem('selectedNoteId', localNote.id);
       setTimeout(() => titleRef.current?.focus(), 50);
     }
@@ -196,6 +200,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
 
   // Insert Interactive Checklist item
   const insertChecklist = () => {
+    setIsEditing(true);
     const checklistLine = '\n[ ] Checklist item';
     const updated = restBody + checklistLine;
     setRestBody(updated);
@@ -263,9 +268,8 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
 
   const isGuest = !user?.email;
 
-  // Split lines to detect interactive checklist items
+  // Split lines to render reading mode content
   const bodyLines = restBody.split('\n');
-  const hasInteractiveChecklists = bodyLines.some((l) => l.startsWith('[ ] ') || l.startsWith('[x] '));
 
   return (
     <main
@@ -299,37 +303,37 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
         {/* Center Formatting Controls with Liquid Glass styling */}
         <div className="flex items-center gap-1.5">
           {/* Checklist Button */}
-          <button
+          <LiquidGlassButton
             type="button"
             onClick={insertChecklist}
-            className="liquid-glass-btn p-1.5 text-[#86868b] hover:text-[#e5a00d] rounded-md transition-colors cursor-pointer"
+            className="p-1.5 text-[#86868b] hover:text-[#e5a00d] rounded-md transition-colors cursor-pointer"
             title="Checklist (⇧⌘L)"
           >
             <SymbolChecklist className="w-4 h-4" />
-          </button>
+          </LiquidGlassButton>
 
           {/* Table Button */}
-          <button
+          <LiquidGlassButton
             type="button"
             onClick={insertTable}
-            className="liquid-glass-btn p-1.5 text-[#86868b] hover:text-[#e5a00d] rounded-md transition-colors cursor-pointer"
+            className="p-1.5 text-[#86868b] hover:text-[#e5a00d] rounded-md transition-colors cursor-pointer"
             title="Insert Table (⌥⌘T)"
           >
             <SymbolTableCells className="w-4 h-4" />
-          </button>
+          </LiquidGlassButton>
 
           {/* Typography Format Dropdown */}
           <div className="relative" ref={formatDropdownRef}>
-            <button
+            <LiquidGlassButton
               type="button"
               onClick={() => setIsFormatOpen(!isFormatOpen)}
-              className={`liquid-glass-btn p-1.5 rounded-md transition-colors cursor-pointer ${
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
                 isFormatOpen ? 'text-[#e5a00d] border-[#e5a00d]/50' : 'text-[#86868b] hover:text-[#e5a00d]'
               }`}
               title="Text Styles (Aa)"
             >
               <SymbolTextFormat className="w-4 h-4" />
-            </button>
+            </LiquidGlassButton>
 
             {isFormatOpen && (
               <div className="liquid-glass absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-xl shadow-2xl p-1.5 z-50 animate-slide-in">
@@ -413,27 +417,42 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
             <SymbolSquareAndArrowUp className="w-4 h-4" />
           </button>
 
+          {/* Done Button (when editing) */}
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditing(false);
+                const full = getFullBody(title, restBody);
+                scheduleSave(full);
+              }}
+              className="px-3 py-1 text-[13px] font-semibold text-[#e5a00d] hover:text-[#f5b800] rounded-md transition-colors cursor-pointer mr-1"
+            >
+              Done
+            </button>
+          )}
+
           {/* New Note Button */}
-          <button
+          <LiquidGlassButton
             type="button"
             onClick={handleCreateNote}
-            className="liquid-glass-btn p-1.5 text-[#e5a00d] rounded-md cursor-pointer"
+            className="p-1.5 text-[#e5a00d] rounded-md cursor-pointer"
             title="New Note (⌘N)"
           >
             <SymbolSquareAndPencil className="w-4 h-4" />
-          </button>
+          </LiquidGlassButton>
 
           {/* Sign In Button / Account Profile Popover */}
           {isGuest ? (
-            <button
+            <LiquidGlassButton
               type="button"
               onClick={() => setIsSignInModalOpen(true)}
-              className="liquid-glass-btn px-3 py-1 text-[12.5px] font-semibold text-white rounded-full flex items-center gap-1.5 cursor-pointer ml-1 hover:border-[#e5a00d]"
+              className="px-3.5 py-1 text-[12.5px] font-semibold text-white rounded-full flex items-center gap-1.5 cursor-pointer ml-1 hover:border-[#e5a00d]"
               title="Sign in with Apple ID"
             >
               <SymbolVpplePeach className="w-3.5 h-3.5 text-[#e5a00d]" />
               <span>Sign In</span>
-            </button>
+            </LiquidGlassButton>
           ) : (
             <div className="relative ml-1">
               <button
@@ -483,41 +502,59 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
                 {formatFullTimestamp(selectedNote.updatedAt || selectedNote.createdAt)}
               </div>
 
-              {/* Title Textarea */}
-              <textarea
-                ref={titleRef}
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    bodyRef.current?.focus();
-                  }
-                }}
-                placeholder="Title"
-                rows={1}
-                className="w-full bg-transparent text-[#f5f5f7] text-3xl font-bold leading-tight resize-none outline-none placeholder:text-[#636366] mb-3 overflow-hidden font-sans tracking-tight"
-                spellCheck={false}
-              />
+              {isEditing ? (
+                <>
+                  {/* Title Textarea */}
+                  <textarea
+                    ref={titleRef}
+                    value={title}
+                    onChange={(e) => handleTitleChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        bodyRef.current?.focus();
+                      }
+                    }}
+                    placeholder="Title"
+                    rows={1}
+                    className="w-full bg-transparent text-[#f5f5f7] text-3xl font-bold leading-tight resize-none outline-none placeholder:text-[#636366] mb-3 overflow-hidden font-sans tracking-tight"
+                    spellCheck={false}
+                  />
 
-              {/* Interactive Checklists Section (if checklists are present) */}
-              {hasInteractiveChecklists && (
-                <div className="mb-4 p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                  <div className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <SymbolChecklist className="w-3.5 h-3.5 text-[#e5a00d]" />
-                    <span>Interactive Checklist</span>
-                  </div>
-                  <div className="space-y-1">
+                  {/* Body Textarea */}
+                  <textarea
+                    ref={bodyRef}
+                    value={restBody}
+                    onChange={(e) => handleRestBodyChange(e.target.value)}
+                    placeholder="Start typing..."
+                    autoFocus
+                    className="w-full min-h-[380px] bg-transparent text-[#e5e5ea] text-[15px] leading-relaxed resize-none outline-none placeholder:text-[#636366] font-sans"
+                    spellCheck={false}
+                  />
+                </>
+              ) : (
+                <div
+                  onClick={() => setIsEditing(true)}
+                  className="cursor-text min-h-[420px]"
+                >
+                  <h1 className="text-3xl font-bold text-[#f5f5f7] mb-4 tracking-tight leading-tight">
+                    {title || 'New Note'}
+                  </h1>
+
+                  <div className="space-y-1 text-[15px] text-[#e5e5ea] leading-relaxed font-sans">
                     {bodyLines.map((line, idx) => {
                       if (line.startsWith('[ ] ')) {
                         return (
                           <div
                             key={idx}
-                            onClick={() => toggleChecklistLine(idx)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleChecklistLine(idx);
+                            }}
                             className="notes-checklist-item cursor-pointer group"
                           >
                             <SymbolCircle className="w-4 h-4 text-[#86868b] group-hover:text-[#e5a00d] flex-shrink-0 transition-colors" />
-                            <span className="text-[14px] text-[#f5f5f7] leading-snug">{line.slice(4)}</span>
+                            <span className="text-[15px] text-[#f5f5f7] leading-snug">{line.slice(4)}</span>
                           </div>
                         );
                       }
@@ -525,29 +562,29 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
                         return (
                           <div
                             key={idx}
-                            onClick={() => toggleChecklistLine(idx)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleChecklistLine(idx);
+                            }}
                             className="notes-checklist-item completed cursor-pointer group"
                           >
                             <SymbolCheckmarkCircleFill className="w-4 h-4 text-[#e5a00d] flex-shrink-0" />
-                            <span className="text-[14px] text-[#86868b] line-through leading-snug">{line.slice(4)}</span>
+                            <span className="text-[15px] text-[#86868b] line-through leading-snug">{line.slice(4)}</span>
                           </div>
                         );
                       }
-                      return null;
+                      if (line.trim() === '') {
+                        return <div key={idx} className="h-4" />;
+                      }
+                      return (
+                        <p key={idx} className="my-1 whitespace-pre-wrap">
+                          {line}
+                        </p>
+                      );
                     })}
                   </div>
                 </div>
               )}
-
-              {/* Body Textarea */}
-              <textarea
-                ref={bodyRef}
-                value={restBody}
-                onChange={(e) => handleRestBodyChange(e.target.value)}
-                placeholder="Start typing..."
-                className="w-full min-h-[380px] bg-transparent text-[#e5e5ea] text-[15px] leading-relaxed resize-none outline-none placeholder:text-[#636366] font-sans"
-                spellCheck={false}
-              />
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-[60vh] text-[#86868b] select-none text-center">

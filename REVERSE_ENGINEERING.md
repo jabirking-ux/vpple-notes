@@ -67,13 +67,14 @@ All keyboard accelerators match native macOS Apple Notes:
 
 ---
 
-## 4. Liquid Glass Specification (Neutral Physical Optics)
+## 4. Liquid Glass Specification (Kyant0 Physical SDF & Ray Optics)
 
-The visual presentation implements authentic physical glass materials matching Apple human interface standards:
-* **Optical Translucency**: Neutral dark frosted material with `backdrop-filter: blur(32px) saturate(180%)` and `background: rgba(36, 36, 38, 0.70)`.
-* **Zero Color Fringe**: Purged all artificial neon gradients, cyan/magenta edges, and rainbow dispersion artifacts in favor of pure optical glass transmission.
-* **Incident Specular Highlight**: Top boundary white specular reflection (`border-top: 1px solid rgba(255, 255, 255, 0.22); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18)`).
-* **Neutral Ambient Shadow**: Multi-tier depth shadow (`0 8px 32px rgba(0, 0, 0, 0.35)`).
+The visual presentation implements authentic physical glass materials directly adapted from **Kyant0/AndroidLiquidGlass** (Apache 2.0):
+* **Signed Distance Field Normal Mapping**: Uses exact 2D rounded rectangle SDF (`sdRoundedRect` and `gradSdRoundedRect`) to compute surface normals at every border pixel.
+* **Nonlinear Lens Displacement**: Applies `circleMap(x) = 1.0 - sqrt(1.0 - x * x)` for physical lens refraction across button and toolbar boundaries.
+* **Directional Specular Highlight**: Evaluates dot product of surface normal and light direction (`dot(grad, normal)` with `pow(abs(d), falloff)`) for cursor-tracking specular sheens.
+* **Neutral Dark Material Base**: Matches Kyant's dark base palette `rgba(18, 18, 18, 0.40)` with `backdrop-filter: blur(32px) saturate(180%)` and zero neon chromatic aberrations.
+* **Incident Highlight & Rim Occlusion**: Top boundary incident highlight (`inset 0 1px 0 rgba(255, 255, 255, 0.32)`) and bottom ambient occlusion shadow (`inset 0 -1px 0 rgba(0, 0, 0, 0.45)`).
 
 ---
 
@@ -90,13 +91,16 @@ The visual presentation implements authentic physical glass materials matching A
 
 ---
 
-## 6. Interactive Checklists & Table Engine
+## 6. Interactive Checklists & Reading vs Editing Mode
 
-* **Interactive Checklists**: Markdown lines starting with `[ ] ` or `[x] ` render visual interactive circular checkbox toggles (`SymbolCircle` -> `SymbolCheckmarkCircleFill`). Clicking toggles state in real-time, updates text strike-through, and triggers debounced autosave.
+* **Default Reading Mode**: Clean, distraction-free Apple Notes reading canvas displaying formatted title and body.
+* **Interactive Checklists**: Markdown lines starting with `[ ] ` or `[x] ` render visual circular checkbox toggles (`SymbolCircle` -> `SymbolCheckmarkCircleFill`). Clicking toggles state in real-time and triggers debounced autosave without duplicating text.
+* **Editing Mode & Done Button**: Clicking note text opens the full editor with keyboard focus; an Amber Gold (`#e5a00d`) **Done** button appears in the top toolbar to return to reading mode.
 * **Table Tooling**: Integrated grid templates with `⌥⌘T` accelerator.
 
 ---
 
 ## 7. Upstream Attribution
 
-All work is derived from and builds upon the open-source release by **Luba Kaper** ([https://github.com/LubaKaper/iCloud-Notes-Clone](https://github.com/LubaKaper/iCloud-Notes-Clone)). The original commit history and core React component structure have been preserved, refined, and hardened to 1:1 Apple Notes fidelity.
+* **iCloud Notes Base Application**: Derived from and building upon the upstream repository by **Luba Kaper** ([https://github.com/LubaKaper/iCloud-Notes-Clone](https://github.com/LubaKaper/iCloud-Notes-Clone)). The original commit history and core React component structure have been preserved, refined, and hardened to 1:1 Apple Notes fidelity.
+* **Liquid Glass Shader Mathematics**: Derived from and incorporating the open-source shader algorithms in [Kyant0/AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass) by Kyant (licensed under the Apache License, Version 2.0). Special thanks to Kyant for the elegant AGSL/SkSL SDF normal and lens refraction mathematics.

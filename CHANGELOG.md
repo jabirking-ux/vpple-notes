@@ -7,6 +7,18 @@ This repository is based on the upstream project [iCloud-Notes-Clone](https://gi
 
 ## [1.3.0] - 2026-11-09
 
+### Added
+- **Kyant0 AndroidLiquidGlass Shader Math Integration**:
+  - Implemented exact shader math from `Kyant0/AndroidLiquidGlass` (Apache 2.0) in `frontend/src/utils/KyantLiquidGlass.ts`:
+    - `sdRoundedRect` and `gradSdRoundedRect` for SDF border normal calculation.
+    - `circleMap(x) = 1.0 - sqrt(1.0 - x * x)` for physical lens displacement mapping.
+    - `dot(grad, normal)` with `pow(abs(d), falloff)` for directional specular sheen.
+    - Real-time cursor-following dynamic highlights in `frontend/src/app/components/LiquidGlassContainer.tsx` (`LiquidGlassButton`).
+- **Apple Notes Reading & Editing Modes**:
+  - Distraction-free reading canvas by default: renders formatted markdown, tables, and interactive checklist items (`SymbolCircle` / `SymbolCheckmarkCircleFill`).
+  - Interactive checklists can be checked and unchecked directly in reading mode without duplicate text boxes.
+  - Apple Notes toolbar **Done** button in Amber Gold (`#e5a00d`) to exit editing mode.
+
 ### Removed
 - **Neon Gradients & Colored Rainbow Prisms**: Completely removed synthetic cyan/magenta edge borders, neon purple/blue radial gradients, and saturated wallpaper layers.
 
@@ -19,10 +31,10 @@ This repository is based on the upstream project [iCloud-Notes-Clone](https://gi
     - Toolbar: `#262626` with neutral subtle bottom border
     - Accent: Apple Notes Amber Gold (`#e5a00d`)
 - **Neutral Liquid Glass Optics**:
-  - Re-engineered Liquid Glass to use physically accurate neutral optical transmission without color casting:
+  - Translucent neutral dark base (`rgba(18, 18, 18, 0.40)`) matching Kyant0's `Color(0xFF121212).copy(0.4f)`:
     - Frosted transmission: `backdrop-filter: blur(32px) saturate(180%)`
-    - Top-edge specular incident highlight: `border-top: 1px solid rgba(255, 255, 255, 0.22)`
-    - Subtle ambient shadow: `0 8px 32px rgba(0, 0, 0, 0.35)`
+    - Top-edge specular incident highlight: `inset 0 1px 0 rgba(255, 255, 255, 0.32)`
+    - Subtle ambient shadow: `inset 0 -1px 0 rgba(0, 0, 0, 0.45)`
 - **iCloud Notes Landing Page Alignment**:
   - Updated `LoginScreen.tsx` to match official `icloud.com/notes` dark landing layout.
   - Neutral `#1c1c1c` backdrop, warm golden notepad icon, and centered 46px white pill **"Sign In"** button.
