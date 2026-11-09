@@ -21,7 +21,7 @@ export const LiquidGlassButton: React.FC<LiquidGlassButtonProps> = ({
 }) => {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [highlightStyle, setHighlightStyle] = useState<string>(
-    'inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.45)'
+    'inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25)'
   );
 
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -35,7 +35,9 @@ export const LiquidGlassButton: React.FC<LiquidGlassButtonProps> = ({
   };
 
   const handleMouseLeave = () => {
-    setHighlightStyle('inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25)');
+    setHighlightStyle(
+      'inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25)'
+    );
   };
 
   return (
@@ -57,5 +59,59 @@ export const LiquidGlassButton: React.FC<LiquidGlassButtonProps> = ({
     >
       {children}
     </button>
+  );
+};
+
+interface LiquidGlassSurfaceProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  className?: string;
+  interactive?: boolean;
+}
+
+export const LiquidGlassSurface: React.FC<LiquidGlassSurfaceProps> = ({
+  children,
+  className = '',
+  interactive = true,
+  style = {},
+  ...props
+}) => {
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const [highlightStyle, setHighlightStyle] = useState<string>(
+    'inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.50), 0 16px 40px rgba(0, 0, 0, 0.45)'
+  );
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!interactive || !surfaceRef.current) return;
+    const rect = surfaceRef.current.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+
+    const { insetBoxShadow } = computeKyantHighlight(rect.width, rect.height, cx, cy, 2.5);
+    setHighlightStyle(`${insetBoxShadow}, inset 0 -1px 0 rgba(0, 0, 0, 0.50), 0 16px 40px rgba(0, 0, 0, 0.45)`);
+  };
+
+  const handleMouseLeave = () => {
+    if (!interactive) return;
+    setHighlightStyle(
+      'inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.50), 0 16px 40px rgba(0, 0, 0, 0.45)'
+    );
+  };
+
+  return (
+    <div
+      ref={surfaceRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`bg-[#1c1c1e]/75 border border-white/10 backdrop-blur-2xl ${className}`}
+      style={{
+        boxShadow: highlightStyle,
+        backdropFilter: 'blur(32px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+        ...style,
+      }}
+      {...props}
+    >
+      {children}
+    </div>
   );
 };

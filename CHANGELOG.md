@@ -5,6 +5,27 @@ This repository is based on the upstream project [iCloud-Notes-Clone](https://gi
 
 ---
 
+## [1.4.0] - 2026-11-09
+
+### Added
+- **Component Architecture Refactoring**:
+  - Modularized `NoteViewer` into dedicated single-responsibility subcomponents:
+    - [`NoteToolbar.tsx`](./frontend/src/app/components/NoteToolbar.tsx): Header action controls, formatting triggers, lock/share toggles, and account popover.
+    - [`NoteEditorCanvas.tsx`](./frontend/src/app/components/NoteEditorCanvas.tsx): Distraction-free reading view with clickable checklists and auto-growing editing textareas.
+    - [`SignInModal.tsx`](./frontend/src/app/components/SignInModal.tsx): Shared Apple ID / Vpple ID modal powered by `LiquidGlassSurface`.
+    - [`ShareModal.tsx`](./frontend/src/app/components/ShareModal.tsx): Export dialog supporting clipboard copying and `.txt` / `.md` file downloads.
+    - [`TextFormatMenu.tsx`](./frontend/src/app/components/TextFormatMenu.tsx): macOS typography popover (Title, Heading, Subheading, Body, Lists, Monospace).
+  - Added [`LiquidGlassSurface`](./frontend/src/app/components/LiquidGlassContainer.tsx) to provide Kyant0 physical glass highlights and SDF borders to modals and panels.
+- **Apple Notes macOS Gallery View (`frontend/src/app/components/NotesList.tsx`)**:
+  - Implemented 2-column note thumbnail card grid when toggled to Gallery View (`SymbolSquareGrid2x2`).
+  - Cards feature document previews, formatted timestamps, pinned badges, and Amber Gold active selection rings.
+
+### Changed
+- Refactored `LoginScreen.tsx` to use `LiquidGlassSurface` and the unified `SignInModal`.
+- Enhanced `Sidebar.tsx` folder creation with Escape key cancellation and input validation.
+
+---
+
 ## [1.3.0] - 2026-11-09
 
 ### Added

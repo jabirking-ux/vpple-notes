@@ -100,7 +100,26 @@ The visual presentation implements authentic physical glass materials directly a
 
 ---
 
-## 7. Upstream Attribution
+## 7. View Modes: List vs Gallery Grid
+
+* **List View**: Classic stacked notes list with Amber Gold highlight, note title, relative timestamp, and 2-line preview snippet.
+* **Gallery View**: 2-column responsive grid simulating miniature paper note cards with dark parchment backgrounds (`#202022`), body text snippets, relative dates, and gold active borders.
+
+---
+
+## 8. Component Architecture & Modular Decomposition
+
+The frontend architecture was decomposed from monolithic components into focused, single-responsibility units:
+* `NoteToolbar`: Encapsulates all action bar triggers, typography triggers, mobile back navigation, and user session management.
+* `NoteEditorCanvas`: Handles reading vs editing transitions, markdown formatting, and checklist state manipulation.
+* `SignInModal`: Reusable Apple ID credential modal utilizing `LiquidGlassSurface`.
+* `ShareModal`: Standalone modal providing clipboard and file download functionality (`.md`, `.txt`).
+* `TextFormatMenu`: macOS Apple Notes typography styling menu.
+* `LiquidGlassSurface`: Reusable glass surface component supporting real-time directional normal highlights and Kyant0 SDF border physics.
+
+---
+
+## 9. Upstream Attribution
 
 * **iCloud Notes Base Application**: Derived from and building upon the upstream repository by **Luba Kaper** ([https://github.com/LubaKaper/iCloud-Notes-Clone](https://github.com/LubaKaper/iCloud-Notes-Clone)). The original commit history and core React component structure have been preserved, refined, and hardened to 1:1 Apple Notes fidelity.
 * **Liquid Glass Shader Mathematics**: Derived from and incorporating the open-source shader algorithms in [Kyant0/AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass) by Kyant (licensed under the Apache License, Version 2.0). Special thanks to Kyant for the elegant AGSL/SkSL SDF normal and lens refraction mathematics.

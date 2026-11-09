@@ -7,8 +7,9 @@ import {
   SymbolPinFill,
   SymbolListBullet,
   SymbolSquareGrid2x2,
-  SymbolXmark
+  SymbolXmark,
 } from './SFSymbols';
+import { LiquidGlassButton } from './LiquidGlassContainer';
 
 interface NotesListProps {
   onOpenSidebar: () => void;
@@ -45,7 +46,7 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
     selectedFolder,
     viewMode,
     setViewMode,
-    togglePinNote
+    togglePinNote,
   } = useNotes();
 
   useEffect(() => {
@@ -95,7 +96,8 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
     return lines.slice(1).join(' ').trim().slice(0, 75);
   };
 
-  const renderNoteCard = (note: Note) => {
+  // Apple Notes List View Card
+  const renderListNoteCard = (note: Note) => {
     const isSelected = selectedNote?.id === note.id;
     const dateStr = formatAppleNotesDate(note.updatedAt || note.createdAt);
     const snippet = getPreviewSnippet(note.body);
@@ -110,7 +112,6 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
             : 'text-[#f5f5f7] hover:bg-white/5'
         }`}
       >
-        {/* Title row */}
         <div className="flex items-center justify-between gap-1">
           <h3
             className={`text-[14px] font-semibold truncate leading-snug ${
@@ -125,7 +126,7 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
               e.stopPropagation();
               togglePinNote(note.id);
             }}
-            className={`p-1 rounded transition-opacity ${
+            className={`p-1 rounded transition-opacity cursor-pointer ${
               note.isPinned
                 ? 'opacity-100 text-[#e5a00d]'
                 : 'opacity-0 group-hover:opacity-60 hover:!opacity-100'
@@ -136,7 +137,6 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
           </button>
         </div>
 
-        {/* Date + Snippet Row */}
         <div className="flex items-center gap-2 mt-1 text-[12px]">
           <span
             className={`flex-shrink-0 font-medium ${
@@ -157,28 +157,69 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
     );
   };
 
+  // Apple Notes Gallery View Card
+  const renderGalleryNoteCard = (note: Note) => {
+    const isSelected = selectedNote?.id === note.id;
+    const dateStr = formatAppleNotesDate(note.updatedAt || note.createdAt);
+    const snippet = getPreviewSnippet(note.body);
+
+    return (
+      <div
+        key={note.id}
+        onClick={() => handleSelectNote(note)}
+        className={`group flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all select-none border ${
+          isSelected
+            ? 'border-[#e5a00d] ring-2 ring-[#e5a00d]/40 shadow-lg'
+            : 'border-white/10 hover:border-white/20'
+        } bg-[#28282a]`}
+      >
+        {/* Note Paper Preview Sheet */}
+        <div className="relative p-3 h-28 bg-[#202022] border-b border-white/5 overflow-hidden flex flex-col justify-between">
+          <p className="text-[11px] text-[#86868b] line-clamp-4 leading-relaxed font-sans select-none">
+            {snippet}
+          </p>
+          <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
+            <span className="text-[10px] text-[#636366] font-mono">{dateStr}</span>
+            {note.isPinned && (
+              <SymbolPinFill className="w-3 h-3 text-[#e5a00d] flex-shrink-0" />
+            )}
+          </div>
+        </div>
+
+        {/* Card Footer Title */}
+        <div className={`p-2.5 ${isSelected ? 'bg-[#e5a00d]/15' : 'bg-transparent'}`}>
+          <h4 className="text-[13px] font-semibold text-white truncate leading-tight">
+            {note.title || 'New Note'}
+          </h4>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       className={`${
         mobileView === 'editor' ? 'hidden md:flex' : 'flex'
       } flex-col w-full md:w-[300px] lg:w-[320px] flex-shrink-0 bg-[#1c1c1e] border-r border-white/5 select-none h-full`}
     >
-      {/* Top Controls Toolbar */}
+      {/* Top Controls Toolbar with Real Kyant Liquid Glass */}
       <div className="liquid-glass-toolbar h-12 px-3 flex items-center justify-between gap-2">
-        <button
+        <LiquidGlassButton
           type="button"
           onClick={onOpenSidebar}
-          className="p-1.5 text-[#86868b] hover:text-white rounded hover:bg-white/5 cursor-pointer"
-          title="Toggle Sidebar (⌥⌘S)"
+          className="p-1.5 text-[#86868b] hover:text-white rounded-md cursor-pointer"
+          title="Toggle Sidebar (Option+Cmd+S)"
         >
           <SymbolSidebarLeft className="w-4 h-4" />
-        </button>
+        </LiquidGlassButton>
 
         <div className="flex items-center gap-1">
-          <button
+          <LiquidGlassButton
             type="button"
             onClick={() => setViewMode(viewMode === 'list' ? 'gallery' : 'list')}
-            className="p-1.5 text-[#86868b] hover:text-white rounded hover:bg-white/5 cursor-pointer"
+            className={`p-1.5 rounded-md cursor-pointer ${
+              viewMode === 'gallery' ? 'text-[#e5a00d]' : 'text-[#86868b] hover:text-white'
+            }`}
             title={viewMode === 'list' ? 'Switch to Gallery View' : 'Switch to List View'}
           >
             {viewMode === 'list' ? (
@@ -186,13 +227,13 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
             ) : (
               <SymbolListBullet className="w-4 h-4" />
             )}
-          </button>
+          </LiquidGlassButton>
         </div>
       </div>
 
       {/* Apple Notes Search Field */}
       <div className="px-3 py-2 border-b border-white/5">
-        <div className="flex items-center gap-2 bg-[#2c2c2e] rounded-lg px-2.5 py-1.5">
+        <div className="flex items-center gap-2 bg-[#2c2c2e] rounded-lg px-2.5 py-1.5 border border-transparent focus-within:border-[#e5a00d]/50 transition-colors">
           <SymbolMagnifyingGlass className="w-3.5 h-3.5 text-[#86868b] flex-shrink-0" />
           <input
             type="text"
@@ -205,7 +246,7 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="p-0.5 text-[#86868b] hover:text-white"
+              className="p-0.5 text-[#86868b] hover:text-white cursor-pointer"
             >
               <SymbolXmark className="w-3 h-3" />
             </button>
@@ -213,11 +254,35 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
         </div>
       </div>
 
-      {/* Notes List Content */}
+      {/* Notes List / Gallery Content */}
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {filteredNotes.length === 0 ? (
           <div className="text-center py-12 text-[#86868b] text-[13px]">
             No Notes Found
+          </div>
+        ) : viewMode === 'gallery' ? (
+          <div className="space-y-4">
+            {pinnedNotes.length > 0 && (
+              <div>
+                <div className="flex items-center gap-1 px-1 py-1 text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-2">
+                  <SymbolPinFill className="w-3 h-3 text-[#e5a00d]" />
+                  <span>Pinned</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {pinnedNotes.map(renderGalleryNoteCard)}
+                </div>
+              </div>
+            )}
+            <div>
+              {pinnedNotes.length > 0 && unpinnedNotes.length > 0 && (
+                <div className="px-1 py-1 text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-2">
+                  Notes
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                {unpinnedNotes.map(renderGalleryNoteCard)}
+              </div>
+            </div>
           </div>
         ) : (
           <>
@@ -228,7 +293,7 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
                   <SymbolPinFill className="w-3 h-3 text-[#e5a00d]" />
                   <span>Pinned</span>
                 </div>
-                {pinnedNotes.map(renderNoteCard)}
+                {pinnedNotes.map(renderListNoteCard)}
               </div>
             )}
 
@@ -239,7 +304,7 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
                   Notes
                 </div>
               )}
-              {unpinnedNotes.map(renderNoteCard)}
+              {unpinnedNotes.map(renderListNoteCard)}
             </div>
           </>
         )}

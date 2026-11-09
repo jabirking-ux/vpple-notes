@@ -68,9 +68,9 @@ vpple-notes/
 ├── frontend/               # React 18 + TypeScript + Vite source code
 │   ├── src/
 │   │   ├── app/
-│   │   │   └── components/ # NotesApp, Sidebar, NotesList, NoteViewer, SFSymbols
+│   │   │   └── components/ # NotesApp, Sidebar, NotesList, NoteViewer, NoteToolbar, NoteEditorCanvas, SignInModal, ShareModal, TextFormatMenu, LiquidGlassContainer, SFSymbols
 │   │   ├── context/        # NotesContext, AuthContext, ToastContext
-│   │   ├── utils/          # api.ts, offlineSync.ts, indexedDb.ts, debounce.ts
+│   │   ├── utils/          # api.ts, offlineSync.ts, indexedDb.ts, debounce.ts, KyantLiquidGlass.ts
 │   │   ├── styles/         # index.css with Apple Notes variables
 │   │   ├── App.tsx
 │   │   └── main.tsx

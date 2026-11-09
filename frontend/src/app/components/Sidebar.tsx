@@ -208,6 +208,12 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               autoFocus
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setIsCreatingFolder(false);
+                  setNewFolderName('');
+                }
+              }}
               onBlur={() => handleNewFolderSubmit()}
               placeholder="Folder Name"
               className="w-full bg-[#2a2a2a] text-white text-[13px] px-2 py-1 rounded border border-[#e5a00d] outline-none"
