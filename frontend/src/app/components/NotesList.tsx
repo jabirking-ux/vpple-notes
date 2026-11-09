@@ -161,11 +161,7 @@ export function NotesList({ onOpenSidebar, mobileView, onMobileViewChange }: Not
     <div
       className={`${
         mobileView === 'editor' ? 'hidden md:flex' : 'flex'
-      } flex-col w-full md:w-[300px] lg:w-[320px] flex-shrink-0 border-r border-white/10 select-none h-full`}
-      style={{
-        background: 'rgba(20, 22, 28, 0.78)',
-        backdropFilter: 'blur(40px) saturate(200%)',
-      }}
+      } flex-col w-full md:w-[300px] lg:w-[320px] flex-shrink-0 bg-[#1c1c1e] border-r border-white/5 select-none h-full`}
     >
       {/* Top Controls Toolbar */}
       <div className="liquid-glass-toolbar h-12 px-3 flex items-center justify-between gap-2">

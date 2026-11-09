@@ -271,11 +271,7 @@ export function NoteViewer({ mobileView, onMobileViewChange }: NoteViewerProps) 
     <main
       className={`${
         mobileView === 'list' ? 'hidden md:flex' : 'flex'
-      } flex-col flex-1 h-full overflow-hidden select-text relative`}
-      style={{
-        background: 'rgba(26, 28, 36, 0.75)',
-        backdropFilter: 'blur(40px) saturate(200%)',
-      }}
+      } flex-col flex-1 h-full overflow-hidden select-text relative bg-[#1e1e1e]`}
     >
       {/* Liquid Glass Top Action Toolbar */}
       <header className="liquid-glass-toolbar h-12 px-4 flex items-center justify-between select-none z-20">

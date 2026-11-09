@@ -5,6 +5,30 @@ This repository is based on the upstream project [iCloud-Notes-Clone](https://gi
 
 ---
 
+## [1.3.0] - 2026-11-09
+
+### Removed
+- **Neon Gradients & Colored Rainbow Prisms**: Completely removed synthetic cyan/magenta edge borders, neon purple/blue radial gradients, and saturated wallpaper layers.
+
+### Changed
+- **Authentic Apple Notes Dark Mode Palette**:
+  - Restored genuine Apple Notes macOS material specifications:
+    - Sidebar: `#1e1e1e` (macOS Source List)
+    - Notes List: `#1c1c1e` (neutral charcoal middle column)
+    - Note Editor Canvas: `#1e1e1e` (clean, distraction-free writing surface)
+    - Toolbar: `#262626` with neutral subtle bottom border
+    - Accent: Apple Notes Amber Gold (`#e5a00d`)
+- **Neutral Liquid Glass Optics**:
+  - Re-engineered Liquid Glass to use physically accurate neutral optical transmission without color casting:
+    - Frosted transmission: `backdrop-filter: blur(32px) saturate(180%)`
+    - Top-edge specular incident highlight: `border-top: 1px solid rgba(255, 255, 255, 0.22)`
+    - Subtle ambient shadow: `0 8px 32px rgba(0, 0, 0, 0.35)`
+- **iCloud Notes Landing Page Alignment**:
+  - Updated `LoginScreen.tsx` to match official `icloud.com/notes` dark landing layout.
+  - Neutral `#1c1c1c` backdrop, warm golden notepad icon, and centered 46px white pill **"Sign In"** button.
+
+---
+
 ## [1.2.0] - 2026-11-09
 
 ### Added

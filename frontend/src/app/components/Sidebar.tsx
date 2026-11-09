@@ -103,13 +103,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 w-[240px] flex-shrink-0 border-r border-white/10 flex flex-col transition-transform select-none md:static md:z-auto md:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-50 w-[240px] flex-shrink-0 bg-[#1e1e1e] border-r border-white/5 flex flex-col transition-transform select-none md:static md:z-auto md:translate-x-0 ${
         open ? 'translate-x-0' : '-translate-x-full'
       }`}
-      style={{
-        background: 'rgba(22, 24, 32, 0.72)',
-        backdropFilter: 'blur(40px) saturate(200%)',
-      }}
     >
       {/* macOS Window Controls + App Identity */}
       <div className="liquid-glass-toolbar h-12 px-4 flex items-center justify-between">
@@ -145,15 +141,13 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           onClick={() => handleSelectFolder('All iCloud')}
           className={`w-full flex items-center justify-between px-2.5 py-1.5 text-[13px] rounded-md transition-colors cursor-pointer ${
             selectedFolder === 'All iCloud'
-              ? 'bg-[#e5a00d] text-white font-medium'
-              : 'text-[#f5f5f7] hover:bg-white/5'
+              ? 'bg-white/10 text-white font-medium'
+              : 'text-[#d1d1d6] hover:bg-white/5'
           }`}
         >
           <div className="flex items-center gap-2 truncate">
             <SymbolFolder
-              className={`w-4 h-4 flex-shrink-0 ${
-                selectedFolder === 'All iCloud' ? 'text-white' : 'text-[#e5a00d]'
-              }`}
+              className="w-4 h-4 flex-shrink-0 text-[#e5a00d]"
             />
             <span className="truncate">All iCloud</span>
           </div>
@@ -175,15 +169,13 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               onClick={() => handleSelectFolder(folder.id)}
               className={`group flex items-center justify-between px-2.5 py-1.5 text-[13px] rounded-md transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-[#e5a00d] text-white font-medium'
-                  : 'text-[#f5f5f7] hover:bg-white/5'
+                  ? 'bg-white/10 text-white font-medium'
+                  : 'text-[#d1d1d6] hover:bg-white/5'
               }`}
             >
               <div className="flex items-center gap-2 truncate">
                 <SymbolFolder
-                  className={`w-4 h-4 flex-shrink-0 ${
-                    isSelected ? 'text-white' : 'text-[#e5a00d]'
-                  }`}
+                  className="w-4 h-4 flex-shrink-0 text-[#e5a00d]"
                 />
                 <span className="truncate">{folder.name}</span>
               </div>

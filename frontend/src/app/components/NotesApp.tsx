@@ -56,7 +56,7 @@ export function NotesApp() {
   return (
     <div
       ref={appContainerRef}
-      className="flex flex-col md:flex-row h-screen tahoe-desktop-bg text-white overflow-hidden select-none"
+      className="flex flex-col md:flex-row h-screen bg-[#1e1e1e] text-white overflow-hidden select-none"
       style={{ pointerEvents: 'auto' }}
     >
       {isOffline && (

@@ -110,10 +110,10 @@ export function LoginScreen() {
   return (
     <div
       ref={containerRef}
-      className="relative min-h-screen tahoe-desktop-bg flex flex-col items-center justify-center px-6 select-none overflow-hidden"
+      className="relative min-h-screen bg-[#1c1c1e] flex flex-col items-center justify-center px-6 select-none overflow-hidden"
     >
       {/* Top Left Global Navigation Bar */}
-      <header className="absolute top-0 left-0 right-0 h-12 px-6 flex items-center justify-between z-30 border-b border-white/10 bg-black/30 backdrop-blur-md">
+      <header className="absolute top-0 left-0 right-0 h-12 px-6 flex items-center justify-between z-30 border-b border-white/5 bg-[#1c1c1e]/90 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <SymbolVpplePeach className="w-5 h-5 text-white/90" />
           <span className="text-white text-[13px] font-semibold tracking-wide">iCloud Notes</span>
@@ -121,20 +121,20 @@ export function LoginScreen() {
         <button
           type="button"
           onClick={() => setShowSignInModal(true)}
-          className="liquid-glass-btn px-4 py-1 text-[13px] font-semibold text-white rounded-full flex items-center gap-1.5 cursor-pointer"
+          className="liquid-glass-btn px-4 py-1.5 text-[13px] font-semibold text-white rounded-full flex items-center gap-1.5 cursor-pointer"
         >
           <span>Sign In</span>
         </button>
       </header>
 
-      {/* Hero Volumetric Liquid Glass Card */}
+      {/* Hero Liquid Glass Card */}
       <main className="liquid-glass rounded-3xl p-10 max-w-md w-full flex flex-col items-center text-center shadow-2xl relative z-20 mt-8">
-        {/* Apple Notes Icon with Golden Liquid Gradient & Bevel */}
+        {/* Apple Notes Icon with Golden Gradient */}
         <div
           className="w-24 h-24 rounded-[22px] flex flex-col justify-center items-center gap-2 shadow-2xl relative overflow-hidden transition-transform hover:scale-105"
           style={{
             background: 'linear-gradient(180deg, #ffd60a 0%, #e59714 50%, #b87104 100%)',
-            boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 12px 32px rgba(229, 160, 13, 0.4)'
+            boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 12px 32px rgba(0, 0, 0, 0.45)'
           }}
         >
           {/* Top light strip */}
@@ -153,8 +153,8 @@ export function LoginScreen() {
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-3 text-[#d1d1d6] text-[15px] leading-relaxed max-w-xs">
-          Capture thoughts, interactive checklists, and tables with macOS Tahoe Liquid Glass optics.
+        <p className="mt-3 text-[#a1a1a6] text-[15px] leading-relaxed max-w-xs">
+          Capture thoughts, create checklists, and organize ideas. Your notes stay up to date on all your devices.
         </p>
 
         {/* Prominent Official Apple "Sign In" Button */}
@@ -173,7 +173,7 @@ export function LoginScreen() {
             onClick={handleLocalSignIn}
             className="text-[13px] text-[#e5a00d] hover:text-[#ffc519] transition-colors mt-2 cursor-pointer font-medium"
           >
-            Continue in Guest / Offline Mode &rsaquo;
+            Continue with Local Notes &rsaquo;
           </button>
         </div>
       </main>

@@ -67,14 +67,13 @@ All keyboard accelerators match native macOS Apple Notes:
 
 ---
 
-## 4. Volumetric Liquid Glass Ray-Optics Specification
+## 4. Liquid Glass Specification (Neutral Physical Optics)
 
-The visual presentation implements physical optics derived from macOS Tahoe & iOS 26 system materials:
-* **Snell's Law Optical Refraction ($\eta = 1.52$)**: Multi-layer translucent backdrop with `backdrop-filter: blur(48px) saturate(220%) contrast(108%) brightness(108%)`.
-* **Edge-Only Chromatic Aberration**: Dual-boundary dispersion meniscus with cyan spectral fringe (`rgba(0, 240, 255, 0.38)`) at top-left and magenta fringe (`rgba(255, 0, 160, 0.32)`) at bottom-right.
-* **Top Edge Refraction Beam**: 1.5px linear-gradient highlight simulating high-angle total internal reflection.
-* **Dynamic Fresnel Caustics**: Angle-dependent specular reflections tracked live via cursor coordinates (`--liquid-mx`, `--liquid-my`).
-* **Atmospheric Desktop Surface**: macOS Tahoe wallpaper gradient diffusion visible through the translucent panels.
+The visual presentation implements authentic physical glass materials matching Apple human interface standards:
+* **Optical Translucency**: Neutral dark frosted material with `backdrop-filter: blur(32px) saturate(180%)` and `background: rgba(36, 36, 38, 0.70)`.
+* **Zero Color Fringe**: Purged all artificial neon gradients, cyan/magenta edges, and rainbow dispersion artifacts in favor of pure optical glass transmission.
+* **Incident Specular Highlight**: Top boundary white specular reflection (`border-top: 1px solid rgba(255, 255, 255, 0.22); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18)`).
+* **Neutral Ambient Shadow**: Multi-tier depth shadow (`0 8px 32px rgba(0, 0, 0, 0.35)`).
 
 ---
 
